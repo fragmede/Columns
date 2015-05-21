@@ -595,7 +595,7 @@ class RainbowRods extends LXPattern {
     rdvel = random (.3 , 1.1);
     revel = random (.3 , 1.1);
     rodheight = model.yMax;
-    rodsize = 20;
+    rodsize = 10;
     
   }
   }
@@ -815,11 +815,13 @@ class CrazyWaves extends LXPattern {
   
   private final SinLFO yPos = new SinLFO(0, model.yMax, 8000);
   private final BasicParameter thickness = new BasicParameter("thick", 2.5, 1, 5);
+  private final BasicParameter saturation = new BasicParameter("sat", 60, 0, 100);
   
   public CrazyWaves(LX lx) {
     super(lx);
     addModulator(yPos).trigger();
     addParameter(thickness);
+    addParameter(saturation);
   }
   public void run(double deltaMs) {
     float hv = lx.getBaseHuef();
@@ -829,23 +831,32 @@ class CrazyWaves extends LXPattern {
       // values. The further away this point is from an exact
       // point, the more we decrease its brightness
       float bv = max(0, 1000 - abs(p.y - yPos.getValuef()) * thickness.getValuef());
-      colors[p.index] = lx.hsb(hv, 60, bv);
+      colors[p.index] = lx.hsb(hv, saturation.getValuef(), bv);
     }
   }
 }
 //--------------------------------Rainbowfade------------------------------------------------------------
 
 class rainbowfade extends LXPattern {
-  private final BasicParameter speed = new BasicParameter("speed", 1, 0.2, 5);
+  private final BasicParameter speed = new BasicParameter("speed", .1, 0.02, .5);
+  private final BasicParameter saturation = new BasicParameter("sat", 30, 0, 100);
+  private final BasicParameter ysign = new BasicParameter("ys", -1, -1, 1);
+  private final BasicParameter xsign = new BasicParameter("xs", -1, -1, 1);
+  private final BasicParameter zsign = new BasicParameter("zs", -1, -1, 1);
   
   public rainbowfade(LX lx) {
     super(lx);
     addParameter(speed);
+    addParameter(saturation);
+    addParameter(ysign);
+    addParameter(xsign);
+    addParameter(zsign);
   }
   public void run(double deltaMs) {
     for (LXPoint p : model.points) {
-      colors[p.index] = lx.hsb(millis() * 0.1 * speed.getValuef() - (p.y + (-1)*p.x + (-1)*p.z) * 2, 
-      30,
+      colors[p.index] = lx.hsb(
+      millis() * speed.getValuef() - ((ysign.getValuef())*p.y + (xsign.getValuef())*p.x + (zsign.getValuef())*p.z) * 2, 
+      saturation.getValuef(),
       80);
     }
   }
@@ -855,16 +866,20 @@ class rainbowfade extends LXPattern {
 class DFC extends LXPattern {
   private final BasicParameter thickness = new BasicParameter("thick", 6, 1, 20);
   private final BasicParameter speed = new BasicParameter("speed", 0.05, 0.05, .5);
+  private final BasicParameter saturation = new BasicParameter("sat", 30, 0, 100);
   
   public DFC(LX lx) {
     super(lx);
     addParameter(thickness);
     addParameter(speed);
+    addParameter(saturation);
   }
   public void run(double deltaMs) {
     for (LXPoint p: model.points) {
       float distancefromcenter = dist(p.x, p.y, p.z, model.cx, model.cy, model.cz);
-      colors[p.index] = lx.hsb(millis() * speed.getValuef() - distancefromcenter * thickness.getValuef(), 30, 100 - distancefromcenter*2);
+      colors[p.index] = lx.hsb(millis() * speed.getValuef() - distancefromcenter * thickness.getValuef(),
+      saturation.getValuef(),
+      100 - distancefromcenter*2);
       
     }
   }
