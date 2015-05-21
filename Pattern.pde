@@ -788,10 +788,12 @@ class zwave extends LXPattern {
     
     private final SinLFO yPos = new SinLFO(0, model.yMax, 1000);
      private final SinLFO brightnessY = new SinLFO(model.yMin, model.yMax, yPos);
+     private final BasicParameter saturation = new BasicParameter("sat", 60, 0, 100);
     
     public RainbowInsanity(LX lx) {
     super(lx);
     addModulator(yPos).trigger();
+    addParameter(saturation);
   }
   public void run(double deltaMs) {
     float falloff = 10 / (FEET);
@@ -801,8 +803,8 @@ class zwave extends LXPattern {
         float distanceFromCenter = dist(p.x, p.y, model.cx, model.cy);
         float distanceFromBrightness = dist(p.y, abs(p.y - model.cy), brightnessY.getValuef(), yWave);
         colors[p.index] = LXColor.hsb(
-          lx.getBaseHuef()/2 * distanceFromCenter*0.4,
-          65,
+          lx.getBaseHuef()/2 * distanceFromCenter*0.2,
+          saturation.getValuef(),
           max(0, 100 - falloff*distanceFromBrightness)
           );
     }
