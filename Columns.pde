@@ -23,6 +23,10 @@ final static int FEET = 12*INCHES;
 Model model;
 P2LX lx;
 
+MidiEngine midiEngine;
+
+LXPattern[] patterns;
+
 // Setup establishes the windowing and LX constructs
 void setup() {
   size(800, 600, OPENGL);
@@ -34,7 +38,7 @@ void setup() {
   lx = new P2LX(this, model);
   
   // Set the patterns
-  lx.setPatterns(new LXPattern[] {
+  patterns = new LXPattern[] {
     new LayerDemoPattern(lx),
     new IteratorTestPattern(lx).setTransition(new DissolveTransition(lx)),
     new AskewPlanes(lx),
@@ -51,7 +55,8 @@ void setup() {
     new zwave(lx),
     new rainbowfade(lx),
     new DFC(lx),
-  });
+  };
+  lx.setPatterns(patterns);
   
   // Add UI elements
   lx.ui.addLayer(
@@ -95,6 +100,9 @@ void setup() {
   lx.ui.addLayer(new UIChannelControl(lx.ui, lx.engine.getChannel(0), 4, 4));
   lx.ui.addLayer(new UIEngineControl(lx.ui, 4, 326));
   lx.ui.addLayer(new UIComponentsDemo(lx.ui, width-144, 4));
+
+	// MIDI stuff (APC40)
+  midiEngine = new MidiEngine(lx);
 
   buildOutputs();
 
