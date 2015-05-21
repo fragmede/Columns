@@ -45,7 +45,7 @@ class LayerDemoPattern extends LXPattern {
         float distanceFromBrightness = dist(p.x, abs(p.y - model.cy), brightnessX.getValuef(), yWave);
         colors[p.index] = LXColor.hsb(
           lx.getBaseHuef() + colorSpread.getValuef() * distanceFromCenter,
-          100,
+          60,
           max(0, 100 - falloff*distanceFromBrightness)
         );
       }
@@ -554,12 +554,12 @@ class CubeBounce extends LXPattern {
         p.y > bouncingcube.bcy - bouncingcube.edgelengthy && p.y < bouncingcube.bcy + bouncingcube.edgelengthy &&
        p.z > bouncingcube.bcz - bouncingcube.edgelengthxz && p.z < bouncingcube.bcz + bouncingcube.edgelengthxz) 
    {
-     //colors[p.index] = lx.hsb(bouncingcube.hue, 100, 100);
+     colors[p.index] = lx.hsb(bouncingcube.hue, 60, 100);
      //colors[p.index] = lx.hsb(
         //(bouncingcube.hue + abs(p.x - model.cx)*1 + p.y*.4) % 360,
         //constrain(130 - p.y*.8, 0, 100),
         //max(0, 100));
-        colors[p.index] = lx.hsb(86, 55, max(0, 1000 - abs(p.y - bouncingcube.bcy*4)));
+        //colors[p.index] = lx.hsb(86, 55, max(0, 1000 - abs(p.y - bouncingcube.bcy*4)));
    }
    }
 }
@@ -595,7 +595,7 @@ class RainbowRods extends LXPattern {
     rdvel = random (.3 , 1.1);
     revel = random (.3 , 1.1);
     rodheight = model.yMax;
-    rodsize = 7;
+    rodsize = 20;
     
   }
   }
@@ -669,7 +669,7 @@ class RainbowRods extends LXPattern {
       p.z > roda.rodz - roda.rodsize && p.z < roda.rodz + roda.rodsize &&
       p.y > roda.rody - roda.rodheight/2 && p.y < roda.rody + roda.rodheight/2)
       {
-        colors[p.index] = lx.hsb((millis() * 0.05), 90, 89);
+        colors[p.index] = lx.hsb((millis() * 0.05), 50, 89);
         
       }
     }
@@ -680,7 +680,7 @@ class RainbowRods extends LXPattern {
       p.z > rodb.rodz - rodb.rodsize && p.z < rodb.rodz + rodb.rodsize &&
       p.y > rodb.rody - rodb.rodheight/2 && p.y < rodb.rody + rodb.rodheight/2)
       {
-       colors[p.index] = lx.hsb((millis() * 0.1 + p.y * 2), 70, 89);
+       colors[p.index] = lx.hsb((millis() * 0.1 + p.y * 2), 50, 89);
         
       }
         }
@@ -689,7 +689,7 @@ class RainbowRods extends LXPattern {
       p.z > rodc.rodz - rodc.rodsize && p.z < rodc.rodz + rodc.rodsize &&
       p.y > rodc.rody - rodc.rodheight/2 && p.y < rodc.rody + rodc.rodheight/2)
       {
-       colors[p.index] = lx.hsb((millis() * 0.2 + p.y * 2), 70, 89);
+       colors[p.index] = lx.hsb((millis() * 0.2 + p.y * 2), 50, 89);
       }
       }
       
@@ -698,7 +698,7 @@ class RainbowRods extends LXPattern {
       p.z > rodd.rodz - rodd.rodsize && p.z < rodd.rodz + rodd.rodsize &&
       p.y > rodd.rody - rodd.rodheight/2 && p.y < rodd.rody + rodd.rodheight/2)
       {
-       colors[p.index] = lx.hsb((millis() * 0.4 + p.y * 2), 70, 89);
+       colors[p.index] = lx.hsb((millis() * 0.4 + p.y * 2), 50, 89);
       }
       }
       
@@ -707,7 +707,7 @@ class RainbowRods extends LXPattern {
       p.z > rode.rodz - rode.rodsize && p.z < rode.rodz + rode.rodsize &&
       p.y > rode.rody - rode.rodheight/2 && p.y < rode.rody + rode.rodheight/2)
       {
-       colors[p.index] = lx.hsb((millis() * 0.03 + p.y * 2), 70, 89);
+       colors[p.index] = lx.hsb((millis() * 0.03 + p.y * 2), 50, 89);
       }
       }
       
@@ -836,13 +836,17 @@ class CrazyWaves extends LXPattern {
 //--------------------------------Rainbowfade------------------------------------------------------------
 
 class rainbowfade extends LXPattern {
+  private final BasicParameter speed = new BasicParameter("speed", 1, 0.2, 5);
   
   public rainbowfade(LX lx) {
     super(lx);
+    addParameter(speed);
   }
   public void run(double deltaMs) {
     for (LXPoint p : model.points) {
-      colors[p.index] = lx.hsb(millis() * 0.1 - p.y + p.x + p.z * 2, 30,80);
+      colors[p.index] = lx.hsb(millis() * 0.1 * speed.getValuef() - (p.y + (-1)*p.x + (-1)*p.z) * 2, 
+      30,
+      80);
     }
   }
 }
@@ -866,6 +870,33 @@ class DFC extends LXPattern {
   }
 }
 
+
+//------------------------------um--------------------------
+ class um extends LXPattern {
+   private final SinLFO yPos1 = new SinLFO(0, model.yMax, 2000);
+   private final SinLFO yPos2 = new SinLFO(model.yMax, 0, 2000);
+   
+   public um(LX lx) {
+     super(lx);
+     addModulator(yPos1).trigger();
+     addModulator(yPos2).trigger();
+   }
+   public void run(double deltaMs) {
+     float hv = lx.getBaseHuef();
+     for (LXPoint p : model.points) {
+       // This is a common technique for modulating brightness.
+      // You can use abs() to determine the distance between two
+      // values. The further away this point is from an exact
+      // point, the more we decrease its brightness
+      float bv1 = max(0, 100 - abs(p.y - yPos1.getValuef()) * 3);
+      float bv2 = max(0, 100 - abs(p.y - yPos2.getValuef()) * 3);
+      colors[p.index] = lx.hsb(hv,
+      60,
+      bv1);
+     
+     }
+   }
+ }
 
         
 
