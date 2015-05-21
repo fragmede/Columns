@@ -55,6 +55,7 @@ void setup() {
     new zwave(lx),
     new rainbowfade(lx),
     new DFC(lx),
+    new um(lx),
   };
   lx.setPatterns(patterns);
   

@@ -890,30 +890,29 @@ class DFC extends LXPattern {
 
 //------------------------------um--------------------------
  class um extends LXPattern {
-   private final SinLFO yPos1 = new SinLFO(0, model.yMax, 2000);
-   private final SinLFO yPos2 = new SinLFO(model.yMax, 0, 2000);
-   
-   public um(LX lx) {
-     super(lx);
-     addModulator(yPos1).trigger();
-     addModulator(yPos2).trigger();
-   }
-   public void run(double deltaMs) {
-     float hv = lx.getBaseHuef();
-     for (LXPoint p : model.points) {
-       // This is a common technique for modulating brightness.
-      // You can use abs() to determine the distance between two
-      // values. The further away this point is from an exact
-      // point, the more we decrease its brightness
-      float bv1 = max(0, 100 - abs(p.y - yPos1.getValuef()) * 3);
-      float bv2 = max(0, 100 - abs(p.y - yPos2.getValuef()) * 3);
-      colors[p.index] = lx.hsb(hv,
-      60,
-      bv1);
-     
-     }
-   }
- }
+  private final BasicParameter thickness = new BasicParameter("thick", 2, 0.1, 20);
+  private final BasicParameter speed = new BasicParameter("speed", 0.05, 0.05, .5);
+  private final BasicParameter saturation = new BasicParameter("sat", 30, 0, 100);
+  private final BasicParameter velocity = new BasicParameter("vel", 1, 1, 100);
+  
+  public um(LX lx) {
+    super(lx);
+    addParameter(thickness);
+    addParameter(speed);
+    addParameter(saturation);
+    addParameter(velocity);
+  }
+  public void run(double deltaMs) {
+    for (LXPoint p: model.points) {
+      float distancefromcenter = dist(p.x, p.y, p.z, model.cx, model.cy, model.cz);
+      float PosCenter = distancefromcenter + velocity.getValuef();
+      colors[p.index] = lx.hsb(millis() * speed.getValuef() - distancefromcenter * thickness.getValuef(),
+      saturation.getValuef(),
+      100 - PosCenter*2);
+      
+    }
+  }
+}
 
         
 
