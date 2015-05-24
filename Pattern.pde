@@ -888,31 +888,45 @@ class DFC extends LXPattern {
 }
 
 
-//------------------------------um--------------------------
- class um extends LXPattern {
-  private final BasicParameter thickness = new BasicParameter("thick", 2, 0.1, 20);
-  private final BasicParameter speed = new BasicParameter("speed", 0.05, 0.05, .5);
+//--------------------------------------------------------
+//--------------------------------Rainbowfadeauto------------------------------------------------------------
+
+class rainbowfadeauto extends LXPattern {
+  private final BasicParameter speed = new BasicParameter("speed", .1, 0.02, .5);
   private final BasicParameter saturation = new BasicParameter("sat", 30, 0, 100);
-  private final BasicParameter velocity = new BasicParameter("vel", 1, 1, 100);
+  private final SinLFO ysign = new SinLFO(1, -1, 43432);
+  private final SinLFO xsign = new SinLFO(-1, 1, 29342);
+  private final SinLFO zsign = new SinLFO(1, -1, 2531);
+  //private final BasicParameter ysign = new BasicParameter("ys", -1, -1, 1);
+  //private final BasicParameter xsign = new BasicParameter("xs", -1, -1, 1);
+  //private final BasicParameter zsign = new BasicParameter("zs", -1, -1, 1);
   
-  public um(LX lx) {
+  public rainbowfadeauto(LX lx) {
     super(lx);
-    addParameter(thickness);
     addParameter(speed);
     addParameter(saturation);
-    addParameter(velocity);
+    addModulator(ysign).trigger();
+    addModulator(xsign).trigger();
+    addModulator(zsign).trigger();
+    //addParameter(ysign);
+    //addParameter(xsign);
+    //addParameter(zsign);
   }
   public void run(double deltaMs) {
-    for (LXPoint p: model.points) {
-      float distancefromcenter = dist(p.x, p.y, p.z, model.cx, model.cy, model.cz);
-      float PosCenter = distancefromcenter + velocity.getValuef();
-      colors[p.index] = lx.hsb(millis() * speed.getValuef() - distancefromcenter * thickness.getValuef(),
+    for (LXPoint p : model.points) {
+      colors[p.index] = lx.hsb(
+      millis() * speed.getValuef() - ((ysign.getValuef())*p.y + (xsign.getValuef())*p.x + (zsign.getValuef())*p.z) * 2, 
       saturation.getValuef(),
-      100 - PosCenter*2);
-      
+      80);
     }
   }
 }
+ 
+  
+   
+ 
+    
+  
 
         
 
