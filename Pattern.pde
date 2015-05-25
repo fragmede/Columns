@@ -575,7 +575,11 @@ class RainbowRods extends LXPattern {
     float rodx;
     float rodz;
     float rody;
-    float rhue;
+    float rahue;
+    float rbhue;
+    float rchue;
+    float rdhue;
+    float rehue;
     float ravel;
     float rbvel;
     float rcvel;
@@ -588,7 +592,11 @@ class RainbowRods extends LXPattern {
     rodx = random (model.xMin, model.xMax);
     rody = 1;
     rodz = random (model.xMin, model.xMax);
-    rhue = millis();
+    rahue = random(20, 84);
+    rbhue = random(20, 84);
+    rchue = random(20, 84);
+    rdhue = random(20, 84);
+    rehue = random(20, 84);
     ravel = random (.3 , 1.1);
     rbvel = random (.3 , 1.1);
     rcvel = random (.3 , 1.1);
@@ -669,7 +677,8 @@ class RainbowRods extends LXPattern {
       p.z > roda.rodz - roda.rodsize && p.z < roda.rodz + roda.rodsize &&
       p.y > roda.rody - roda.rodheight/2 && p.y < roda.rody + roda.rodheight/2)
       {
-        colors[p.index] = lx.hsb((millis() * 0.05), 50, 89);
+        //colors[p.index] = lx.hsb((millis() * 0.05), 50, 89);
+        colors[p.index] = lx.hsb(roda.rahue, 70, 95);
         
       }
     }
@@ -680,7 +689,8 @@ class RainbowRods extends LXPattern {
       p.z > rodb.rodz - rodb.rodsize && p.z < rodb.rodz + rodb.rodsize &&
       p.y > rodb.rody - rodb.rodheight/2 && p.y < rodb.rody + rodb.rodheight/2)
       {
-       colors[p.index] = lx.hsb((millis() * 0.1 + p.y * 2), 50, 89);
+       //colors[p.index] = lx.hsb((millis() * 0.1 + p.y * 2), 50, 89);
+       colors[p.index] = lx.hsb(rodb.rbhue, 70, 95);
         
       }
         }
@@ -689,7 +699,8 @@ class RainbowRods extends LXPattern {
       p.z > rodc.rodz - rodc.rodsize && p.z < rodc.rodz + rodc.rodsize &&
       p.y > rodc.rody - rodc.rodheight/2 && p.y < rodc.rody + rodc.rodheight/2)
       {
-       colors[p.index] = lx.hsb((millis() * 0.2 + p.y * 2), 50, 89);
+       //colors[p.index] = lx.hsb((millis() * 0.2 + p.y * 2), 50, 89);
+       colors[p.index] = lx.hsb(rodc.rchue, 70, 89);
       }
       }
       
@@ -698,7 +709,8 @@ class RainbowRods extends LXPattern {
       p.z > rodd.rodz - rodd.rodsize && p.z < rodd.rodz + rodd.rodsize &&
       p.y > rodd.rody - rodd.rodheight/2 && p.y < rodd.rody + rodd.rodheight/2)
       {
-       colors[p.index] = lx.hsb((millis() * 0.4 + p.y * 2), 50, 89);
+       //colors[p.index] = lx.hsb((millis() * 0.4 + p.y * 2), 50, 89);
+       colors[p.index] = lx.hsb(rodd.rdhue, 70, 89);
       }
       }
       
@@ -707,7 +719,8 @@ class RainbowRods extends LXPattern {
       p.z > rode.rodz - rode.rodsize && p.z < rode.rodz + rode.rodsize &&
       p.y > rode.rody - rode.rodheight/2 && p.y < rode.rody + rode.rodheight/2)
       {
-       colors[p.index] = lx.hsb((millis() * 0.03 + p.y * 2), 50, 89);
+       //colors[p.index] = lx.hsb((millis() * 0.03 + p.y * 2), 50, 89);
+       colors[p.index] = lx.hsb(rode.rehue, 70, 89);
       }
       }
       
@@ -816,8 +829,8 @@ class zwave extends LXPattern {
 class CrazyWaves extends LXPattern {
   
   private final SinLFO yPos = new SinLFO(0, model.yMax, 8000);
-  private final BasicParameter thickness = new BasicParameter("thick", 2.5, 1, 5);
-  private final BasicParameter saturation = new BasicParameter("sat", 60, 0, 100);
+  private final BasicParameter thickness = new BasicParameter("thick", 1, 1, 5);
+  private final BasicParameter saturation = new BasicParameter("sat", 20, 0, 100);
   
   public CrazyWaves(LX lx) {
     super(lx);
@@ -892,11 +905,13 @@ class DFC extends LXPattern {
 //--------------------------------Rainbowfadeauto------------------------------------------------------------
 
 class rainbowfadeauto extends LXPattern {
+  private final BasicParameter period = new BasicParameter("T", 1, 1, 1000);
   private final BasicParameter speed = new BasicParameter("speed", .1, 0.02, .5);
   private final BasicParameter saturation = new BasicParameter("sat", 30, 0, 100);
-  private final SinLFO ysign = new SinLFO(1, -1, 43432);
-  private final SinLFO xsign = new SinLFO(-1, 1, 29342);
-  private final SinLFO zsign = new SinLFO(1, -1, 2531);
+  private final SinLFO ysign = new SinLFO(1, -1, 6000 * period.getValuef());
+  private final SinLFO xsign = new SinLFO(-1, 1, 7000 * period.getValuef());
+  private final SinLFO zsign = new SinLFO(1, -1, 8000 * period.getValuef());
+  private final BasicParameter size = new BasicParameter("size", 2, 0.5, 15);
   //private final BasicParameter ysign = new BasicParameter("ys", -1, -1, 1);
   //private final BasicParameter xsign = new BasicParameter("xs", -1, -1, 1);
   //private final BasicParameter zsign = new BasicParameter("zs", -1, -1, 1);
@@ -905,6 +920,8 @@ class rainbowfadeauto extends LXPattern {
     super(lx);
     addParameter(speed);
     addParameter(saturation);
+    addParameter(size);
+    addParameter(period);
     addModulator(ysign).trigger();
     addModulator(xsign).trigger();
     addModulator(zsign).trigger();
@@ -915,14 +932,330 @@ class rainbowfadeauto extends LXPattern {
   public void run(double deltaMs) {
     for (LXPoint p : model.points) {
       colors[p.index] = lx.hsb(
-      millis() * speed.getValuef() - ((ysign.getValuef())*p.y + (xsign.getValuef())*p.x + (zsign.getValuef())*p.z) * 2, 
+      millis() * speed.getValuef() - ((ysign.getValuef())*p.y + (xsign.getValuef())*p.x + (zsign.getValuef())*p.z) * size.getValuef(), 
       saturation.getValuef(),
       80);
     }
   }
 }
- 
+//--------------------------------MultiSine------------------------------------------------------------
+class MultiSine extends LXPattern {
+  final int numLayers = 3;
+  int[][] distLayerDivisors = {{10, 50, 10}, {10, 50, 10}}; 
+  final BasicParameter brightEffect = new BasicParameter("Bright", 100, 0, 100);
+
+  final BasicParameter[] timingSettings =  {
+    new BasicParameter("T1", 6300, 5000, 30000),
+    new BasicParameter("T2", 4300, 2000, 10000),
+    new BasicParameter("T3", 11000, 10000, 20000)
+  };
+  SinLFO[] frequencies = {
+    new SinLFO(0, 1, timingSettings[0]),
+    new SinLFO(0, 1, timingSettings[1]),
+    new SinLFO(0, 1, timingSettings[2])
+  };      
+  MultiSine(LX lx) {
+    super(lx);
+    for (int i = 0; i < numLayers; i++){
+      addParameter(timingSettings[i]);
+      addModulator(frequencies[i]).start();
+    }
+    addParameter(brightEffect);
+  }
   
+  public void run(double deltaMs) {
+    if (getChannel().getFader().getNormalized() == 0) return;
+
+    for (LXPoint p : model.points) {
+      float[] combinedDistanceSines = {0, 0};
+      for (int i = 0; i < numLayers; i++){
+        combinedDistanceSines[0] += sin(TWO_PI * frequencies[i].getValuef() + p.y / distLayerDivisors[0][i]) / numLayers;
+        combinedDistanceSines[1] += sin(TWO_PI * frequencies[i].getValuef() + TWO_PI*(p.z / distLayerDivisors[1][i])) / numLayers;
+      }
+      float hueVal = (lx.getBaseHuef() + 20 * sin(TWO_PI * (combinedDistanceSines[0] + combinedDistanceSines[1]))) % 360;
+      float brightVal = (100 - brightEffect.getValuef()) + brightEffect.getValuef() * (2 + combinedDistanceSines[0] + combinedDistanceSines[1]) / 4;
+      float satVal = 90 + 10 * sin(TWO_PI * (combinedDistanceSines[0] + combinedDistanceSines[1]));
+      colors[p.index] = lx.hsb(hueVal,  satVal, brightVal);
+    }
+  }
+}
+
+//--------------------------------sparkletakeover------------------------------------------------------------
+class SparkleTakeOver extends LXPattern {
+  int[] sparkleTimeOuts;
+  int lastComplimentaryToggle = 0;
+  int complimentaryToggle = 0;
+  boolean resetDone = false;
+  final SinLFO timing = new SinLFO(6000, 10000, 20000);
+  final SawLFO coverage = new SawLFO(0, 100, timing);
+  final BasicParameter hueVariation = new BasicParameter("HueVar", 0.1, 0.1, 0.4);
+  float hueSeparation = 180;
+  float newHueVal;
+  float oldHueVal;
+  float newBrightVal = 100;
+  float oldBrightVal = 100;
+  SparkleTakeOver(LX lx) {
+    super(lx);
+    sparkleTimeOuts = new int[model.points.size()];
+    addModulator(timing).start();    
+    addModulator(coverage).start();
+    addParameter(hueVariation);
+  }  
+  public void run(double deltaMs) {
+    if (getChannel().getFader().getNormalized() == 0) return;
+    
+    if (coverage.getValuef() < 5){
+      if (!resetDone){
+        lastComplimentaryToggle = complimentaryToggle;
+        oldBrightVal = newBrightVal;
+        if (random(5) < 2){          
+          complimentaryToggle = 1 - complimentaryToggle;
+          newBrightVal = 100;
+        }
+        else {
+          newBrightVal = (newBrightVal == 100) ? 70 : 100;          
+        }
+        for (int i = 0; i < model.points.size(); i++){
+          sparkleTimeOuts[i] = 0;
+        }        
+        resetDone = true;
+      }
+    }     
+    else {
+      resetDone = false;
+    }
+    for (LXPoint p : model.points) {  
+      float newHueVal = (lx.getBaseHuef() + complimentaryToggle * hueSeparation + hueVariation.getValuef() * p.y) % 360;
+      float oldHueVal = (lx.getBaseHuef() + lastComplimentaryToggle * hueSeparation + hueVariation.getValuef() * p.y) % 360;
+      if (sparkleTimeOuts[p.index] > millis()){        
+        colors[p.index] = lx.hsb(newHueVal,  (30 + coverage.getValuef()) / 1.3, newBrightVal);
+      }
+      else {
+        colors[p.index] = lx.hsb(oldHueVal,  (140 - coverage.getValuef()) / 1.4, oldBrightVal);
+        float chance = random(abs(sin((TWO_PI / 360) * p.x * 4) * 50) + abs(sin(TWO_PI * (p.y / 9000))) * 50);
+        if (chance > (100 - 100*(pow(coverage.getValuef()/100, 2)))){
+          sparkleTimeOuts[p.index] = millis() + 50000;
+        }
+        else if (chance > 1.1 * (100 - coverage.getValuef())){
+          sparkleTimeOuts[p.index] = millis() + 100;
+        }
+          
+      }
+        
+    }
+  }
+}
+
+
+//--------------------------------------------------sparklehelix--------------------------------------------------------------------------
+
+class SparkleHelix extends LXPattern {
+  final BasicParameter minCoil = new BasicParameter("MinCOIL", .02, .005, .05);
+  final BasicParameter maxCoil = new BasicParameter("MaxCOIL", .03, .005, .05);
+  final BasicParameter sparkle = new BasicParameter("Spark", 80, 160, 10);
+  final BasicParameter sparkleSaturation = new BasicParameter("Sat", 50, 0, 100);
+  final BasicParameter counterSpiralStrength = new BasicParameter("Double", 0, 0, 1);
+  
+  final SinLFO coil = new SinLFO(minCoil, maxCoil, 8000);
+  final SinLFO rate = new SinLFO(6000, 1000, 19000);
+  final SawLFO spin = new SawLFO(0, TWO_PI, rate);
+  final SinLFO width = new SinLFO(10, 20, 11000);
+  int[] sparkleTimeOuts;
+  SparkleHelix(LX lx) {
+    super(lx);
+    addParameter(minCoil);
+    addParameter(maxCoil);
+    addParameter(sparkle);
+    addParameter(sparkleSaturation);
+    addParameter(counterSpiralStrength);
+    addModulator(rate).start();
+    addModulator(coil).start();    
+    addModulator(spin).start();
+    addModulator(width).start();
+    sparkleTimeOuts = new int[model.points.size()];
+  }
+  
+  public void run(double deltaMs) {
+    if (getChannel().getFader().getNormalized() == 0) return;
+
+    for (LXPoint p : model.points) {
+      float compensatedWidth = (0.7 + .02 / coil.getValuef()) * width.getValuef();
+      float spiralVal = max(0, 100 - (100*TWO_PI / (compensatedWidth))*LXUtils.wrapdistf((TWO_PI / 360) * p.x, 8*TWO_PI + spin.getValuef() + coil.getValuef()*(p.y-model.cy), TWO_PI));
+      float counterSpiralVal = counterSpiralStrength.getValuef() * max(0, 100 - (100*TWO_PI / (compensatedWidth))*LXUtils.wrapdistf((TWO_PI / 360) * p.x, 8*TWO_PI - spin.getValuef() - coil.getValuef()*(p.y-model.cy), TWO_PI));
+      float hueVal = (lx.getBaseHuef() + .1*p.y) % 360;
+      if (sparkleTimeOuts[p.index] > millis()){        
+        colors[p.index] = lx.hsb(hueVal, sparkleSaturation.getValuef(), 100);
+      }
+      else{
+        colors[p.index] = lx.hsb(hueVal, 100, max(spiralVal, counterSpiralVal));        
+        if (random(max(spiralVal, counterSpiralVal)) > sparkle.getValuef()){
+          sparkleTimeOuts[p.index] = millis() + 100;
+        }
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------------------------------------------
+
+class um extends LXPattern {
+  private final SinLFO fadetime = new SinLFO(1, 0, 10000);
+  
+  private final BasicParameter thickness = new BasicParameter("thick", 6, 1, 20);
+  private final BasicParameter speed = new BasicParameter("speed", 0.05, 0.05, .5);
+  private final BasicParameter saturation = new BasicParameter("sat", 30, 0, 100);
+
+  
+  float pointx = random (model.xMin, model.xMax);
+  float pointy = random (model.yMin, model.yMax);
+  float pointz = random (model.zMin, model.zMax);
+
+  
+  public um(LX lx) {
+    super(lx);
+    addParameter(thickness);
+    addParameter(speed);
+    addParameter(saturation);
+    addModulator(fadetime).trigger();
+  }
+  public void run(double deltaMs) {
+      
+    for (LXPoint p: model.points) {
+      float distancefrompoint = dist(p.x, p.y, p.z, pointx, pointy, pointz);
+      colors[p.index] = lx.hsb(millis() * speed.getValuef() - distancefrompoint * thickness.getValuef(),
+      saturation.getValuef(),
+      max(0, 100 - distancefrompoint * 2) * fadetime.getValuef());
+      
+      if (fadetime.getValuef() < 1) {
+      pointx = random (model.xMin, model.xMax);
+      pointx = random (model.yMin, model.yMax);
+      pointx = random (model.zMin, model.zMax);
+    }
+      
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------------------------------------------
+
+class um2 extends LXPattern {
+  private final SinLFO fadetime = new SinLFO(1, 0, 6000);
+  
+  private final BasicParameter thickness = new BasicParameter("thick", 6, 1, 20);
+  private final BasicParameter speed = new BasicParameter("speed", 0.05, 0.05, .5);
+  private final BasicParameter saturation = new BasicParameter("sat", 30, 0, 100);
+
+  
+  float pointx = random (model.xMin, model.xMax);
+  float pointy = random (model.yMin, model.yMax);
+  float pointz = random (model.zMin, model.zMax);
+
+  
+  public um2(LX lx) {
+    super(lx);
+    addParameter(thickness);
+    addParameter(speed);
+    addParameter(saturation);
+    addModulator(fadetime).trigger();
+  }
+  public void run(double deltaMs) {
+                
+    if (fadetime.getValuef() < 0.00001) {
+      pointx = random (model.xMin, model.xMax);
+      pointy = random (model.yMin, model.yMax);
+      pointz = random (model.zMin, model.zMax);  
+    }
+
+       
+    for (LXPoint p: model.points) {
+      float distancefrompoint = dist(p.x, p.y, p.z, pointx, pointy, pointz);
+      colors[p.index] = lx.hsb(millis() * speed.getValuef() - distancefrompoint * thickness.getValuef(),
+      saturation.getValuef(),
+      max(0, 100 - distancefrompoint * 1.5) * fadetime.getValuef());
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------------------------------------------
+
+class um3 extends LXPattern {
+  private final SawLFO fadetimeA = new SawLFO(1, 0.01, 3439);
+  private final SawLFO fadetimeB = new SawLFO(1, 0.01, 2213);
+  private final SawLFO fadetimeC = new SawLFO(1, 0.01, 1284);
+  
+  private final BasicParameter thickness = new BasicParameter("thick", 6, 1, 20);
+  private final BasicParameter speed = new BasicParameter("speed", 0.05, 0.05, .5);
+  private final BasicParameter saturation = new BasicParameter("sat", 30, 0, 100);
+
+  
+  float pointxA = random (model.xMin, model.xMax);
+  float pointyA = random (model.yMin, model.yMax);
+  float pointzA = random (model.zMin, model.zMax);
+  float pointxB = random (model.xMin, model.xMax);
+  float pointyB = random (model.yMin, model.yMax);
+  float pointzB = random (model.zMin, model.zMax);
+  float pointxC = random (model.xMin, model.xMax);
+  float pointyC = random (model.yMin, model.yMax);
+  float pointzC = random (model.zMin, model.zMax);
+  float hueA = random(1, 360);
+  float hueB = random(1, 360);
+  float hueC = random(1, 360);
+
+  
+  public um3(LX lx) {
+    super(lx);
+    addParameter(thickness);
+    addParameter(speed);
+    addParameter(saturation);
+    addModulator(fadetimeA).trigger();
+    addModulator(fadetimeB).trigger();
+    addModulator(fadetimeC).trigger();
+  }
+  
+  public void run(double deltaMs) {
+                
+    if (fadetimeA.getValuef() < 0.02) {
+      pointxA = random (model.xMin, model.xMax);
+      pointyA = random (model.yMin, model.yMax);
+      pointzA = random (model.zMin, model.zMax);
+      hueA = random(1, 360);
+    }  
+      
+    if (fadetimeB.getValuef() < 0.02) {
+      pointxB = random (model.xMin, model.xMax);
+      pointyB = random (model.yMin, model.yMax);
+      pointzB = random (model.zMin, model.zMax);
+      hueB = random(1, 360);  
+    }
+    
+    if (fadetimeC.getValuef() < 0.02) {
+      pointxC = random (model.xMin, model.xMax);
+      pointyC = random (model.yMin, model.yMax);
+      pointzC = random (model.zMin, model.zMax);
+      hueB = random(1, 360);  
+    }
+    
+    for (LXPoint p: model.points) {
+      float distancefrompointA = dist(p.x, p.y, p.z, pointxA, pointyA, pointzA);
+      float distancefrompointB = dist(p.x, p.y, p.z, pointxB, pointyB, pointzB);
+      float distancefrompointC = dist(p.x, p.y, p.z, pointxB, pointyB, pointzB);
+
+      float hueA = millis() * speed.getValuef() - distancefrompointA * thickness.getValuef();
+      //float hueB = millis() * speed.getValuef() - distancefrompointB * thickness.getValuef();
+      float brightnessA = max(0, 100 - distancefrompointA * 2.85) * fadetimeA.getValuef();
+      float brightnessB = max(0, 100 - distancefrompointB * 2.85) * fadetimeB.getValuef();
+      float brightnessC = max(0, 100 - distancefrompointC * 2.85) * fadetimeC.getValuef();
+      colors[p.index] = lx.hsb(
+        hueA,
+        saturation.getValuef(),
+        min(100, (brightnessA + brightnessB + brightnessC)));
+    }
+  }
+}
+
+
+
+
    
  
     

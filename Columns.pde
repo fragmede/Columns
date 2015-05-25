@@ -56,6 +56,13 @@ void setup() {
     new rainbowfade(lx),
     new DFC(lx),
     new rainbowfadeauto(lx),
+    new MultiSine(lx),
+    new SparkleTakeOver(lx),
+    new SparkleHelix(lx),
+    new um(lx),
+    new um2(lx),
+    new um3(lx),
+   
   };
   lx.setPatterns(patterns);
   

@@ -10,7 +10,7 @@ static class Model extends LXModel {
   
   private static class Fixture extends LXAbstractFixture {
     
-    private static final int MATRIX_SIZE = 4;
+    //private static final int MATRIX_SIZE = 4;
     
     private Fixture() {
       // Here's the core loop where we generate the positions
