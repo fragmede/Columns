@@ -309,86 +309,86 @@ class Pulley extends LXPattern {
   }
 }
 
-//***********************************Bouncyball*******************************************************************
-//******************************************************************************************************
-//***********************************Bouncyball*******************************************************************
-class BouncyBalls extends LXPattern {
-  
-  static final int NUM_BALLS = 1;
-  
-  class BouncyBall {
-       
-    Accelerator yPos;
-    TriangleLFO xPos = new TriangleLFO(0, model.xMax, random(8000, 19000));
-    float zPos;
-    
-    BouncyBall(int i) {
-      addModulator(xPos.setBasis(random(0, TWO_PI))).start();
-      addModulator(yPos = new Accelerator(0, 0, 0));
-      zPos = lerp(model.zMin, model.zMax, (i+2.) / (NUM_BALLS + 4.));
-    }
-    
-    void bounce(float midiVel) {
-      float v = 100 + 80*midiVel;
-      yPos.setSpeed(v, getAccel(v, 60 / lx.tempo.bpmf())).start();
-    }
-    
-    float getAccel(float v, float oneBeat) {
-      return -2*v / oneBeat;
-    }
-    
-    void run(double deltaMs) {
-      float flrLevel = flr.getValuef() * model.xMax/2.;
-      if (yPos.getValuef() < flrLevel) {
-        if (yPos.getVelocity() < -50) {
-          yPos.setValue(2*flrLevel-yPos.getValuef());
-          float v = -yPos.getVelocityf() * bounce.getValuef();
-          yPos.setSpeed(v, getAccel(v, 60 / lx.tempo.bpmf()));
-        } else {
-          yPos.setValue(flrLevel).stop();
-        }
-      }
-      float falloff = 130.f / (12 + blobSize.getValuef() * 36);
-      float xv = xPos.getValuef();
-      float yv = yPos.getValuef();
-      
-      for (LXPoint p : model.points) {
-        float d = sqrt((p.x-xv)*(p.x-xv) + (p.y-yv)*(p.y-yv) + .1*(p.z-zPos)*(p.z-zPos));
-        float b = constrain(130 - falloff*d, 0, 100);
-        if (b > 0) {
-          blendColor(p.index, lx.hsb(
-            (lx.getBaseHuef() + p.y*.5 + abs(model.cx - p.x) * .5) % 360,
-            max(0, 100 - .45*(p.y - flrLevel)),
-            b
-          ), LXColor.Blend.ADD);
-        }
-      }
-    }
-  }
-  
-  final BouncyBall[] balls = new BouncyBall[NUM_BALLS];
-  
-  final BasicParameter bounce = new BasicParameter("BNC", .8);
-  final BasicParameter flr = new BasicParameter("FLR", 0);
-  final BasicParameter blobSize = new BasicParameter("SIZE", 0.5);
-  
-  BouncyBalls(LX lx) {
-    super(lx);
-    for (int i = 0; i < balls.length; ++i) {
-      balls[i] = new BouncyBall(i);
-    }
-    addParameter(bounce);
-    addParameter(flr);
-    addParameter(blobSize);
-  }
-  
-  public void run(double deltaMs) {
-    setColors(#000000);
-    for (BouncyBall b : balls) {
-      b.run(deltaMs);
-    }
-  }
-  }
+////***********************************Bouncyball*******************************************************************
+////******************************************************************************************************
+////***********************************Bouncyball*******************************************************************
+//class BouncyBalls extends LXPattern {
+//  
+//  static final int NUM_BALLS = 1;
+//  
+//  class BouncyBall {
+//       
+//    Accelerator yPos;
+//    TriangleLFO xPos = new TriangleLFO(0, model.xMax, random(8000, 19000));
+//    float zPos;
+//    
+//    BouncyBall(int i) {
+//      addModulator(xPos.setBasis(random(0, TWO_PI))).start();
+//      addModulator(yPos = new Accelerator(0, 0, 0));
+//      zPos = lerp(model.zMin, model.zMax, (i+2.) / (NUM_BALLS + 4.));
+//    }
+//    
+//    void bounce(float midiVel) {
+//      float v = 100 + 80*midiVel;
+//      yPos.setSpeed(v, getAccel(v, 60 / lx.tempo.bpmf())).start();
+//    }
+//    
+//    float getAccel(float v, float oneBeat) {
+//      return -2*v / oneBeat;
+//    }
+//    
+//    void run(double deltaMs) {
+//      float flrLevel = flr.getValuef() * model.xMax/2.;
+//      if (yPos.getValuef() < flrLevel) {
+//        if (yPos.getVelocity() < -50) {
+//          yPos.setValue(2*flrLevel-yPos.getValuef());
+//          float v = -yPos.getVelocityf() * bounce.getValuef();
+//          yPos.setSpeed(v, getAccel(v, 60 / lx.tempo.bpmf()));
+//        } else {
+//          yPos.setValue(flrLevel).stop();
+//        }
+//      }
+//      float falloff = 130.f / (12 + blobSize.getValuef() * 36);
+//      float xv = xPos.getValuef();
+//      float yv = yPos.getValuef();
+//      
+//      for (LXPoint p : model.points) {
+//        float d = sqrt((p.x-xv)*(p.x-xv) + (p.y-yv)*(p.y-yv) + .1*(p.z-zPos)*(p.z-zPos));
+//        float b = constrain(130 - falloff*d, 0, 100);
+//        if (b > 0) {
+//          blendColor(p.index, lx.hsb(
+//            (lx.getBaseHuef() + p.y*.5 + abs(model.cx - p.x) * .5) % 360,
+//            max(0, 100 - .45*(p.y - flrLevel)),
+//            b
+//          ), LXColor.Blend.ADD);
+//        }
+//      }
+//    }
+//  }
+//  
+//  final BouncyBall[] balls = new BouncyBall[NUM_BALLS];
+//  
+//  final BasicParameter bounce = new BasicParameter("BNC", .8);
+//  final BasicParameter flr = new BasicParameter("FLR", 0);
+//  final BasicParameter blobSize = new BasicParameter("SIZE", 0.5);
+//  
+//  BouncyBalls(LX lx) {
+//    super(lx);
+//    for (int i = 0; i < balls.length; ++i) {
+//      balls[i] = new BouncyBall(i);
+//    }
+//    addParameter(bounce);
+//    addParameter(flr);
+//    addParameter(blobSize);
+//  }
+//  
+//  public void run(double deltaMs) {
+//    setColors(#000000);
+//    for (BouncyBall b : balls) {
+//      b.run(deltaMs);
+//    }
+//  }
+//  }
 //***********************************XC*******************************************************************
 //******************************************************************************************************
 //***********************************XC*******************************************************************
@@ -480,90 +480,90 @@ class CrossSections extends LXPattern {
   }
 }
 
-//***********************************CubeBoune*******************************************************************
-//******************************************************************************************************
-//***********************************CubeBounce*******************************************************************
-
-class CubeBounce extends LXPattern {
-
-  private final BasicParameter cvel = new BasicParameter("cvel", 1, 1/2, 10);
-  
-  
-  class BouncingCube {
-    float bcx;
-    float bcy;
-    float bcz;
-    float edgelengthxz;
-    float edgelengthy;
-    float hue;
-    float bcvelx;
-    float bcvely;
-    float bcvelz;
-    float rhue;
-  
-    
-  BouncingCube() {
-    edgelengthxz = FEET*2;
-    edgelengthy = FEET*1.3;
-    bcx = 3;
-    bcy = random(1, 15);
-    bcz = 3;
-    bcvelx = .25;
-    bcvely = .25;
-    bcvelz = .25;
-    hue = random(100);
-    rhue = second();
-    
-  }
-  } 
-  
-  private BouncingCube bouncingcube;
-  public CubeBounce(LX lx)
-  {
-    super(lx);
-    bouncingcube = new BouncingCube();
-    addParameter(cvel);
-  }
-  public void run(double deltaMs) {
-    
-  
-    for(LXPoint p : model.points) {
-      colors[p.index] = 0;
-    }
-   
-   if (bouncingcube.bcx > model.xMax || bouncingcube.bcx < model.xMin) {
-    bouncingcube.bcvelx = -bouncingcube.bcvelx;
-    bouncingcube.hue = random(255);
-   } 
-   if (bouncingcube.bcy > model.yMax || bouncingcube.bcx < model.yMin) {
-    bouncingcube.bcvely = -bouncingcube.bcvely;
-    bouncingcube.hue = random(255);
-   }
-    if (bouncingcube.bcz > model.zMax || bouncingcube.bcx < model.zMin) {
-    bouncingcube.bcvelz = -bouncingcube.bcvelz;
-    bouncingcube.hue = random(255);
-   }
-   
-   
-   bouncingcube.bcx = bouncingcube.bcx + bouncingcube.bcvelx * cvel.getValuef();
-   bouncingcube.bcy = bouncingcube.bcy + bouncingcube.bcvely * cvel.getValuef();
-   bouncingcube.bcz = bouncingcube.bcz + bouncingcube.bcvelz * cvel.getValuef();
- 
-   for (LXPoint p : model.points) {
-     if (p.x > bouncingcube.bcx - bouncingcube.edgelengthxz && p.x < bouncingcube.bcx + bouncingcube.edgelengthxz &&
-        p.y > bouncingcube.bcy - bouncingcube.edgelengthy && p.y < bouncingcube.bcy + bouncingcube.edgelengthy &&
-       p.z > bouncingcube.bcz - bouncingcube.edgelengthxz && p.z < bouncingcube.bcz + bouncingcube.edgelengthxz) 
-   {
-     colors[p.index] = lx.hsb(bouncingcube.hue, 60, 100);
-     //colors[p.index] = lx.hsb(
-        //(bouncingcube.hue + abs(p.x - model.cx)*1 + p.y*.4) % 360,
-        //constrain(130 - p.y*.8, 0, 100),
-        //max(0, 100));
-        //colors[p.index] = lx.hsb(86, 55, max(0, 1000 - abs(p.y - bouncingcube.bcy*4)));
-   }
-   }
-}
-}
+////***********************************CubeBoune*******************************************************************
+////******************************************************************************************************
+////***********************************CubeBounce*******************************************************************
+//
+//class CubeBounce extends LXPattern {
+//
+//  private final BasicParameter cvel = new BasicParameter("cvel", 1, 1/2, 10);
+//  
+//  
+//  class BouncingCube {
+//    float bcx;
+//    float bcy;
+//    float bcz;
+//    float edgelengthxz;
+//    float edgelengthy;
+//    float hue;
+//    float bcvelx;
+//    float bcvely;
+//    float bcvelz;
+//    float rhue;
+//  
+//    
+//  BouncingCube() {
+//    edgelengthxz = FEET*2;
+//    edgelengthy = FEET*1.3;
+//    bcx = 3;
+//    bcy = random(1, 15);
+//    bcz = 3;
+//    bcvelx = .25;
+//    bcvely = .25;
+//    bcvelz = .25;
+//    hue = random(100);
+//    rhue = second();
+//    
+//  }
+//  } 
+//  
+//  private BouncingCube bouncingcube;
+//  public CubeBounce(LX lx)
+//  {
+//    super(lx);
+//    bouncingcube = new BouncingCube();
+//    addParameter(cvel);
+//  }
+//  public void run(double deltaMs) {
+//    
+//  
+//    for(LXPoint p : model.points) {
+//      colors[p.index] = 0;
+//    }
+//   
+//   if (bouncingcube.bcx > model.xMax || bouncingcube.bcx < model.xMin) {
+//    bouncingcube.bcvelx = -bouncingcube.bcvelx;
+//    bouncingcube.hue = random(255);
+//   } 
+//   if (bouncingcube.bcy > model.yMax || bouncingcube.bcx < model.yMin) {
+//    bouncingcube.bcvely = -bouncingcube.bcvely;
+//    bouncingcube.hue = random(255);
+//   }
+//    if (bouncingcube.bcz > model.zMax || bouncingcube.bcx < model.zMin) {
+//    bouncingcube.bcvelz = -bouncingcube.bcvelz;
+//    bouncingcube.hue = random(255);
+//   }
+//   
+//   
+//   bouncingcube.bcx = bouncingcube.bcx + bouncingcube.bcvelx * cvel.getValuef();
+//   bouncingcube.bcy = bouncingcube.bcy + bouncingcube.bcvely * cvel.getValuef();
+//   bouncingcube.bcz = bouncingcube.bcz + bouncingcube.bcvelz * cvel.getValuef();
+// 
+//   for (LXPoint p : model.points) {
+//     if (p.x > bouncingcube.bcx - bouncingcube.edgelengthxz && p.x < bouncingcube.bcx + bouncingcube.edgelengthxz &&
+//        p.y > bouncingcube.bcy - bouncingcube.edgelengthy && p.y < bouncingcube.bcy + bouncingcube.edgelengthy &&
+//       p.z > bouncingcube.bcz - bouncingcube.edgelengthxz && p.z < bouncingcube.bcz + bouncingcube.edgelengthxz) 
+//   {
+//     colors[p.index] = lx.hsb(bouncingcube.hue, 60, 100);
+//     //colors[p.index] = lx.hsb(
+//        //(bouncingcube.hue + abs(p.x - model.cx)*1 + p.y*.4) % 360,
+//        //constrain(130 - p.y*.8, 0, 100),
+//        //max(0, 100));
+//        //colors[p.index] = lx.hsb(86, 55, max(0, 1000 - abs(p.y - bouncingcube.bcy*4)));
+//   }
+//   }
+//}
+//}
 
 //***********************************RF*******************************************************************
 //******************************************************************************************************
@@ -1099,7 +1099,7 @@ class SparkleHelix extends LXPattern {
 //----------------------------------------------------------------------------------------------------------------------------
 
 class um extends LXPattern {
-  private final SinLFO fadetime = new SinLFO(1, 0, 10000);
+  private final SinLFO fadetime = new SinLFO(1, 0.1, 10000);
   
   private final BasicParameter thickness = new BasicParameter("thick", 6, 1, 20);
   private final BasicParameter speed = new BasicParameter("speed", 0.05, 0.05, .5);
@@ -1160,7 +1160,7 @@ class um2 extends LXPattern {
   }
   public void run(double deltaMs) {
                 
-    if (fadetime.getValuef() < 0.00001) {
+    if (fadetime.getValuef() < 0.01) {
       pointx = random (model.xMin, model.xMax);
       pointy = random (model.yMin, model.yMax);
       pointz = random (model.zMin, model.zMax);  
@@ -1240,7 +1240,7 @@ class um3 extends LXPattern {
       float distancefrompointB = dist(p.x, p.y, p.z, pointxB, pointyB, pointzB);
       float distancefrompointC = dist(p.x, p.y, p.z, pointxB, pointyB, pointzB);
 
-      float hueA = millis() * speed.getValuef() - distancefrompointA * thickness.getValuef();
+      //float hueA = millis() * speed.getValuef() - distancefrompointA * thickness.getValuef();
       //float hueB = millis() * speed.getValuef() - distancefrompointB * thickness.getValuef();
       float brightnessA = max(0, 100 - distancefrompointA * 2.85) * fadetimeA.getValuef();
       float brightnessB = max(0, 100 - distancefrompointB * 2.85) * fadetimeB.getValuef();

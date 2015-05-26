@@ -44,9 +44,9 @@ void setup() {
     new AskewPlanes(lx),
     new ShiftingPlane(lx),
     new Pulley(lx),
-    new BouncyBalls(lx),
+    //new BouncyBalls(lx),
     new CrossSections(lx),
-    new CubeBounce(lx),
+    //new CubeBounce(lx),
     new RainbowRods(lx),
     new RainbowInsanity(lx),
     new CrazyWaves(lx),
@@ -112,7 +112,7 @@ void setup() {
 	// MIDI stuff (APC40)
   midiEngine = new MidiEngine(lx);
 
-  buildOutputs();
+  //buildOutputs();
 
 }
 
