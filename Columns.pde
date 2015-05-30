@@ -39,6 +39,8 @@ void setup() {
   
   // Set the patterns
   patterns = new LXPattern[] {
+    new Rods(lx),
+    new um3_lists(lx),
     new LayerDemoPattern(lx),
     new IteratorTestPattern(lx).setTransition(new DissolveTransition(lx)),
     new AskewPlanes(lx),
@@ -61,8 +63,11 @@ void setup() {
     new SparkleHelix(lx),
     new um(lx),
     new um2(lx),
-    new um3(lx),
-   
+//    new um3(lx),
+    //new um4(lx),
+    new Stripes(lx),
+    new SeeSaw(lx),
+    new SweepPattern(lx),
   };
   lx.setPatterns(patterns);
   
@@ -112,7 +117,7 @@ void setup() {
 	// MIDI stuff (APC40)
   midiEngine = new MidiEngine(lx);
 
-  //buildOutputs();
+  buildOutputs();
 
 }
 
