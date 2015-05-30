@@ -754,7 +754,7 @@ class xwave extends LXPattern {
       // You can use abs() to determine the distance between two
       // values. The further away this point is from an exact
       // point, the more we decrease its brightness
-      float bv = max(0, 100 - abs(p.x - xPos.getValuef()) * 3);
+      float bv = max(0, 100 - abs(p.x - xPos.getValuef()) * 6);
       colors[p.index] = lx.hsb(hv, 100, bv);
     }
   }
@@ -1455,6 +1455,7 @@ class um3_lists extends LXPattern {
   private final BasicParameter saturation = new BasicParameter("sat", 45, 0, 100);
   private final BasicParameter dots = new BasicParameter("dots", 6, 1, 15);
   private final BasicParameter bright = new BasicParameter("bright", .4, 0.15, 4);
+  private final BasicParameter huefactor = new BasicParameter("hue", 1, 0.25, 4);
 
 
 
@@ -1480,6 +1481,7 @@ class um3_lists extends LXPattern {
     addParameter(saturation);
     addParameter(dots);
     addParameter(bright);
+    addParameter(huefactor);
 
     //int NUM_OF_DOTS = round(dots.getValuef());
 
@@ -1536,7 +1538,7 @@ class um3_lists extends LXPattern {
         }
 
         colors[p.index] = lx.hsb(
-        lx.getBaseHuef()/3 + (360 - hoosum), 
+        lx.getBaseHuef()/3 + (360 - hoosum * huefactor.getValuef()), 
         saturation.getValuef(), 
         min(100, brightnessumm * bright.getValuef()));
       }
@@ -1547,8 +1549,10 @@ class um3_lists extends LXPattern {
 //----------------------------------------------------------------------------------------------------------------------------
 
 class Rods extends LXPattern {
-
-  int numRods = 20;
+ private final BasicParameter huerate = new BasicParameter("hue", 1, 0.25, 10);
+ private final BasicParameter numberofrods = new BasicParameter("rods", 30, 5, 60);
+  
+  int numRods = 60;
   private final FloatList rodx = new FloatList();
   private final FloatList rody = new FloatList();
   private final FloatList rodz = new FloatList();
@@ -1556,10 +1560,12 @@ class Rods extends LXPattern {
   private final FloatList rodspeed = new FloatList();
   private final FloatList distancefromrod = new FloatList();
   float rodheight = model.yMax;
-  float rodsize = 5;
+  float rodsize = 4;
 
   public Rods(LX lx) {
     super(lx);
+    addParameter(huerate);
+    addParameter(numberofrods);
 
     for (int i = 0; i < numRods; i++) {
       rodx.set(i, random(model.xMin, model.xMax));  
@@ -1571,7 +1577,9 @@ class Rods extends LXPattern {
   }
 
   public void run(double deltaMx) {
-
+    
+    int numRods = round(numberofrods.getValuef());
+    
     for (LXPoint p : model.points) {
       colors[p.index] = 0;
     }
@@ -1582,7 +1590,7 @@ class Rods extends LXPattern {
         rodx.set(i, random(model.xMin, model.xMax));  
         rody.set(i, model.yMin - rodheight/2);  
         rodz.set(i, random(model.zMin, model.zMax));
-        rodhue.set(i, rodhue.get(i) + 2);  
+        rodhue.set(i, rodhue.get(i) + 1);  
         if (rodhue.get(i) > 360) {
           rodhue.set(i, rodhue.get(i) - 360);
         }
@@ -1601,7 +1609,7 @@ class Rods extends LXPattern {
           p.z > rodz.get(i) - rodsize && p.z < rodz.get(i) + rodsize &&
           p.y > rody.get(i) - rodheight/2 && p.y < rody.get(i) + rodheight/2)
         {
-          colors[p.index] = lx.hsb(hv, 70, bv);
+          colors[p.index] = lx.hsb(hv * huerate.getValuef(), 70, bv);
         }
       }
     }
