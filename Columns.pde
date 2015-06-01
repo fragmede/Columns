@@ -49,7 +49,7 @@ void setup() {
     //new BouncyBalls(lx),
     new CrossSections(lx),
     //new CubeBounce(lx),
-    new RainbowRods(lx),
+   // new RainbowRods(lx),
     new RainbowInsanity(lx),
     new CrazyWaves(lx),
     new xwave(lx),
@@ -117,7 +117,7 @@ void setup() {
 	// MIDI stuff (APC40)
   midiEngine = new MidiEngine(lx);
 
-  buildOutputs();
+  //buildOutputs();
 
 }
 

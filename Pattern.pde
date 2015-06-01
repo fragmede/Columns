@@ -564,156 +564,156 @@ class CrossSections extends LXPattern {
 //}
 //}
 
-//***********************************RF*******************************************************************
-//******************************************************************************************************
-//***********************************RF*******************************************************************
-
-class RainbowRods extends LXPattern {
-
-  class Rod {
-    float rodx;
-    float rodz;
-    float rody;
-    float rahue;
-    float rbhue;
-    float rchue;
-    float rdhue;
-    float rehue;
-    float ravel;
-    float rbvel;
-    float rcvel;
-    float rdvel;
-    float revel;
-    float rodheight;
-    float rodsize;
-
-    Rod() {
-      rodx = random (model.xMin, model.xMax);
-      rody = 1;
-      rodz = random (model.xMin, model.xMax);
-      rahue = random(20, 84);
-      rbhue = random(20, 84);
-      rchue = random(20, 84);
-      rdhue = random(20, 84);
-      rehue = random(20, 84);
-      ravel = random (.3, 1.1);
-      rbvel = random (.3, 1.1);
-      rcvel = random (.3, 1.1);
-      rdvel = random (.3, 1.1);
-      revel = random (.3, 1.1);
-      rodheight = model.yMax;
-      rodsize = 10;
-    }
-  }
-
-  private Rod roda;
-  private Rod rodb;
-  private Rod rodc;
-  private Rod rodd;
-  private Rod rode;
-  public RainbowRods(LX lx)
-  {
-    super(lx);
-    roda = new Rod();
-    rodb = new Rod();
-    rodc = new Rod();
-    rodd = new Rod();
-    rode = new Rod();
-  }
-  public void run(double deltaMx) {
-
-    for (LXPoint p : model.points) {
-      colors[p.index] = 0;
-    }
-
-    if (roda.rody > model.yMax + roda.rodheight/2) {
-      roda.rody = -roda.rodheight/2;
-      roda.rodx = random (model.xMin, model.xMax);
-      roda.rodz = random (model.xMin, model.xMax);
-    }
-
-    if (rodb.rody > model.yMax + rodb.rodheight/2) {
-      rodb.rody = -rodb.rodheight/2;
-      rodb.rodx = random (model.xMin, model.xMax);
-      rodb.rodz = random (model.xMin, model.xMax);
-    }
-
-
-    if (rodc.rody > model.yMax + rodc.rodheight/2) {
-      rodc.rody = -rodc.rodheight/2;
-      rodc.rodx = random (model.xMin, model.xMax);
-      rodc.rodz = random (model.xMin, model.xMax);
-    }
-
-    if (rodd.rody > model.yMax + rodd.rodheight/2) {
-      rodd.rody = -rodd.rodheight/2;
-      rodd.rodx = random (model.xMin, model.xMax);
-      rodd.rodz = random (model.xMin, model.xMax);
-    }
-
-    if (rode.rody > model.yMax + rode.rodheight/2) {
-      rode.rody = -rode.rodheight/2;
-      rode.rodx = random (model.xMin, model.xMax);
-      rode.rodz = random (model.xMin, model.xMax);
-    }
-
-    roda.rody = roda.rody + roda.ravel;
-    rodb.rody = rodb.rody + rodb.rbvel;
-    rodc.rody = rodc.rody + rodc.rcvel;
-    rodd.rody = rodd.rody + rodd.rdvel;
-    rode.rody = rode.rody + rode.revel;
-
-    for (LXPoint p : model.points) {
-      if (p.x > roda.rodx - roda.rodsize && p.x < roda.rodx + roda.rodsize &&
-        p.z > roda.rodz - roda.rodsize && p.z < roda.rodz + roda.rodsize &&
-        p.y > roda.rody - roda.rodheight/2 && p.y < roda.rody + roda.rodheight/2)
-      {
-        //colors[p.index] = lx.hsb((millis() * 0.05), 50, 89);
-        colors[p.index] = lx.hsb(roda.rahue, 70, 95);
-      }
-    }
-
-
-    for (LXPoint p : model.points) {
-      if (p.x > rodb.rodx - rodb.rodsize && p.x < rodb.rodx + rodb.rodsize &&
-        p.z > rodb.rodz - rodb.rodsize && p.z < rodb.rodz + rodb.rodsize &&
-        p.y > rodb.rody - rodb.rodheight/2 && p.y < rodb.rody + rodb.rodheight/2)
-      {
-        //colors[p.index] = lx.hsb((millis() * 0.1 + p.y * 2), 50, 89);
-        colors[p.index] = lx.hsb(rodb.rbhue, 70, 95);
-      }
-    }
-    for (LXPoint p : model.points) {
-      if (p.x > rodc.rodx - rodc.rodsize && p.x < rodc.rodx + rodc.rodsize &&
-        p.z > rodc.rodz - rodc.rodsize && p.z < rodc.rodz + rodc.rodsize &&
-        p.y > rodc.rody - rodc.rodheight/2 && p.y < rodc.rody + rodc.rodheight/2)
-      {
-        //colors[p.index] = lx.hsb((millis() * 0.2 + p.y * 2), 50, 89);
-        colors[p.index] = lx.hsb(rodc.rchue, 70, 89);
-      }
-    }
-
-    for (LXPoint p : model.points) {
-      if (p.x > rodd.rodx - rodd.rodsize && p.x < rodd.rodx + rodd.rodsize &&
-        p.z > rodd.rodz - rodd.rodsize && p.z < rodd.rodz + rodd.rodsize &&
-        p.y > rodd.rody - rodd.rodheight/2 && p.y < rodd.rody + rodd.rodheight/2)
-      {
-        //colors[p.index] = lx.hsb((millis() * 0.4 + p.y * 2), 50, 89);
-        colors[p.index] = lx.hsb(rodd.rdhue, 70, 89);
-      }
-    }
-
-    for (LXPoint p : model.points) {
-      if (p.x > rode.rodx - rode.rodsize && p.x < rode.rodx + rode.rodsize &&
-        p.z > rode.rodz - rode.rodsize && p.z < rode.rodz + rode.rodsize &&
-        p.y > rode.rody - rode.rodheight/2 && p.y < rode.rody + rode.rodheight/2)
-      {
-        //colors[p.index] = lx.hsb((millis() * 0.03 + p.y * 2), 50, 89);
-        colors[p.index] = lx.hsb(rode.rehue, 70, 89);
-      }
-    }
-  }
-}
+////***********************************RF*******************************************************************
+////******************************************************************************************************
+////***********************************RF*******************************************************************
+//
+//class RainbowRods extends LXPattern {
+//
+//  class Rod {
+//    float rodx;
+//    float rodz;
+//    float rody;
+//    float rahue;
+//    float rbhue;
+//    float rchue;
+//    float rdhue;
+//    float rehue;
+//    float ravel;
+//    float rbvel;
+//    float rcvel;
+//    float rdvel;
+//    float revel;
+//    float rodheight;
+//    float rodsize;
+//
+//    Rod() {
+//      rodx = random (model.xMin, model.xMax);
+//      rody = 1;
+//      rodz = random (model.xMin, model.xMax);
+//      rahue = random(20, 84);
+//      rbhue = random(20, 84);
+//      rchue = random(20, 84);
+//      rdhue = random(20, 84);
+//      rehue = random(20, 84);
+//      ravel = random (.3, 1.1);
+//      rbvel = random (.3, 1.1);
+//      rcvel = random (.3, 1.1);
+//      rdvel = random (.3, 1.1);
+//      revel = random (.3, 1.1);
+//      rodheight = model.yMax;
+//      rodsize = 10;
+//    }
+//  }
+//
+//  private Rod roda;
+//  private Rod rodb;
+//  private Rod rodc;
+//  private Rod rodd;
+//  private Rod rode;
+//  public RainbowRods(LX lx)
+//  {
+//    super(lx);
+//    roda = new Rod();
+//    rodb = new Rod();
+//    rodc = new Rod();
+//    rodd = new Rod();
+//    rode = new Rod();
+//  }
+//  public void run(double deltaMx) {
+//
+//    for (LXPoint p : model.points) {
+//      colors[p.index] = 0;
+//    }
+//
+//    if (roda.rody > model.yMax + roda.rodheight/2) {
+//      roda.rody = -roda.rodheight/2;
+//      roda.rodx = random (model.xMin, model.xMax);
+//      roda.rodz = random (model.xMin, model.xMax);
+//    }
+//
+//    if (rodb.rody > model.yMax + rodb.rodheight/2) {
+//      rodb.rody = -rodb.rodheight/2;
+//      rodb.rodx = random (model.xMin, model.xMax);
+//      rodb.rodz = random (model.xMin, model.xMax);
+//    }
+//
+//
+//    if (rodc.rody > model.yMax + rodc.rodheight/2) {
+//      rodc.rody = -rodc.rodheight/2;
+//      rodc.rodx = random (model.xMin, model.xMax);
+//      rodc.rodz = random (model.xMin, model.xMax);
+//    }
+//
+//    if (rodd.rody > model.yMax + rodd.rodheight/2) {
+//      rodd.rody = -rodd.rodheight/2;
+//      rodd.rodx = random (model.xMin, model.xMax);
+//      rodd.rodz = random (model.xMin, model.xMax);
+//    }
+//
+//    if (rode.rody > model.yMax + rode.rodheight/2) {
+//      rode.rody = -rode.rodheight/2;
+//      rode.rodx = random (model.xMin, model.xMax);
+//      rode.rodz = random (model.xMin, model.xMax);
+//    }
+//
+//    roda.rody = roda.rody + roda.ravel;
+//    rodb.rody = rodb.rody + rodb.rbvel;
+//    rodc.rody = rodc.rody + rodc.rcvel;
+//    rodd.rody = rodd.rody + rodd.rdvel;
+//    rode.rody = rode.rody + rode.revel;
+//
+//    for (LXPoint p : model.points) {
+//      if (p.x > roda.rodx - roda.rodsize && p.x < roda.rodx + roda.rodsize &&
+//        p.z > roda.rodz - roda.rodsize && p.z < roda.rodz + roda.rodsize &&
+//        p.y > roda.rody - roda.rodheight/2 && p.y < roda.rody + roda.rodheight/2)
+//      {
+//        //colors[p.index] = lx.hsb((millis() * 0.05), 50, 89);
+//        colors[p.index] = lx.hsb(roda.rahue, 70, 95);
+//      }
+//    }
+//
+//
+//    for (LXPoint p : model.points) {
+//      if (p.x > rodb.rodx - rodb.rodsize && p.x < rodb.rodx + rodb.rodsize &&
+//        p.z > rodb.rodz - rodb.rodsize && p.z < rodb.rodz + rodb.rodsize &&
+//        p.y > rodb.rody - rodb.rodheight/2 && p.y < rodb.rody + rodb.rodheight/2)
+//      {
+//        //colors[p.index] = lx.hsb((millis() * 0.1 + p.y * 2), 50, 89);
+//        colors[p.index] = lx.hsb(rodb.rbhue, 70, 95);
+//      }
+//    }
+//    for (LXPoint p : model.points) {
+//      if (p.x > rodc.rodx - rodc.rodsize && p.x < rodc.rodx + rodc.rodsize &&
+//        p.z > rodc.rodz - rodc.rodsize && p.z < rodc.rodz + rodc.rodsize &&
+//        p.y > rodc.rody - rodc.rodheight/2 && p.y < rodc.rody + rodc.rodheight/2)
+//      {
+//        //colors[p.index] = lx.hsb((millis() * 0.2 + p.y * 2), 50, 89);
+//        colors[p.index] = lx.hsb(rodc.rchue, 70, 89);
+//      }
+//    }
+//
+//    for (LXPoint p : model.points) {
+//      if (p.x > rodd.rodx - rodd.rodsize && p.x < rodd.rodx + rodd.rodsize &&
+//        p.z > rodd.rodz - rodd.rodsize && p.z < rodd.rodz + rodd.rodsize &&
+//        p.y > rodd.rody - rodd.rodheight/2 && p.y < rodd.rody + rodd.rodheight/2)
+//      {
+//        //colors[p.index] = lx.hsb((millis() * 0.4 + p.y * 2), 50, 89);
+//        colors[p.index] = lx.hsb(rodd.rdhue, 70, 89);
+//      }
+//    }
+//
+//    for (LXPoint p : model.points) {
+//      if (p.x > rode.rodx - rode.rodsize && p.x < rode.rodx + rode.rodsize &&
+//        p.z > rode.rodz - rode.rodsize && p.z < rode.rodz + rode.rodsize &&
+//        p.y > rode.rody - rode.rodheight/2 && p.y < rode.rody + rode.rodheight/2)
+//      {
+//        //colors[p.index] = lx.hsb((millis() * 0.03 + p.y * 2), 50, 89);
+//        colors[p.index] = lx.hsb(rode.rehue, 70, 89);
+//      }
+//    }
+//  }
+//}
 
 //--------------------------------xwave------------------------------------------------------------
 
@@ -829,10 +829,6 @@ class CrazyWaves extends LXPattern {
   public void run(double deltaMs) {
     float hv = lx.getBaseHuef();
     for (LXPoint p : model.points) {
-      // This is a common technique for modulating brightness.
-      // You can use abs() to determine the distance between two
-      // values. The further away this point is from an exact
-      // point, the more we decrease its brightness
       float bv = max(0, 1000 - abs(p.y - yPos.getValuef()) * thickness.getValuef());
       colors[p.index] = lx.hsb(hv, saturation.getValuef(), bv);
     }
@@ -1549,10 +1545,12 @@ class um3_lists extends LXPattern {
 //----------------------------------------------------------------------------------------------------------------------------
 
 class Rods extends LXPattern {
- private final BasicParameter huerate = new BasicParameter("hue", 1, 0.25, 10);
- private final BasicParameter numberofrods = new BasicParameter("rods", 30, 5, 60);
-  
-  int numRods = 60;
+  private final BasicParameter huerate = new BasicParameter("hue", 1, 0.25, 10);
+  private final BasicParameter numberofrods = new BasicParameter("rods", 30, 5, 100);
+  private final BasicParameter falloff = new BasicParameter("fall", 2.8, 1, 8);
+  private final BasicParameter rodthick = new BasicParameter("thick", 3, 1, 30);
+
+  int numRods = 100;
   private final FloatList rodx = new FloatList();
   private final FloatList rody = new FloatList();
   private final FloatList rodz = new FloatList();
@@ -1560,26 +1558,27 @@ class Rods extends LXPattern {
   private final FloatList rodspeed = new FloatList();
   private final FloatList distancefromrod = new FloatList();
   float rodheight = model.yMax;
-  float rodsize = 4;
 
   public Rods(LX lx) {
     super(lx);
     addParameter(huerate);
     addParameter(numberofrods);
-
+    addParameter(falloff);
+    addParameter(rodthick);
     for (int i = 0; i < numRods; i++) {
       rodx.set(i, random(model.xMin, model.xMax));  
       rody.set(i, 1);  
       rodz.set(i, random(model.zMin, model.zMax));
-      rodspeed.set(i, random(.15, .55));
-      rodhue.set(i, random(0, 59));
+      rodspeed.set(i, random(0.8, 2.6));
+      rodhue.set(i, random(0, 30));
     }
   }
 
   public void run(double deltaMx) {
-    
+
     int numRods = round(numberofrods.getValuef());
-    
+  float rodsize = rodthick.getValuef();
+
     for (LXPoint p : model.points) {
       colors[p.index] = 0;
     }
@@ -1592,7 +1591,7 @@ class Rods extends LXPattern {
         rodz.set(i, random(model.zMin, model.zMax));
         rodhue.set(i, rodhue.get(i) + 1);  
         if (rodhue.get(i) > 360) {
-          rodhue.set(i, rodhue.get(i) - 360);
+          rodhue.set(i, 1);
         }
       }
     }
@@ -1604,7 +1603,7 @@ class Rods extends LXPattern {
         float hv = rodhue.get(i); 
         float rodius = abs(p.y - rody.get(i));
         distancefromrod.set(i, rodius);
-        float bv = max(0, 100 - distancefromrod.get(i)*2.8);
+        float bv = max(0, 100 - distancefromrod.get(i)*falloff.getValuef());
         if (p.x > rodx.get(i) - rodsize && p.x < rodx.get(i) + rodsize &&
           p.z > rodz.get(i) - rodsize && p.z < rodz.get(i) + rodsize &&
           p.y > rody.get(i) - rodheight/2 && p.y < rody.get(i) + rodheight/2)
@@ -1616,4 +1615,4 @@ class Rods extends LXPattern {
   }
 }
 
-
+  
