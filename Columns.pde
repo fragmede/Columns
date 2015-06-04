@@ -1,4 +1,5 @@
 // Get all our imports out of the way
+import java.util.*;
 import heronarts.lx.*;
 import heronarts.lx.audio.*;
 import heronarts.lx.color.*;
