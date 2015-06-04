@@ -27,7 +27,7 @@ final static int FEET = 12*INCHES;
 Model model;
 P2LX lx;
 
-//MidiEngine midiEngine;
+MidiEngine midiEngine;
 
 LXPattern[] patterns;
 
@@ -121,7 +121,7 @@ void setup() {
   lx.ui.addLayer(new UIComponentsDemo(lx.ui, width-144, 4));
 
 	// MIDI stuff (APC40)
-  //midiEngine = new MidiEngine(lx);
+  midiEngine = new MidiEngine(lx);
 
   buildOutputs();
 

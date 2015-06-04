@@ -1,16 +1,37 @@
+
+final static byte[] APC_MODE_SYSEX = {
+  (byte) 0xf0, // sysex start
+  (byte) 0x47, // manufacturers id
+  (byte) 0x00, // device id
+  (byte) 0x73, // product model id
+  (byte) 0x60, // message
+  (byte) 0x00, // bytes MSB
+  (byte) 0x04, // bytes LSB
+  (byte) 0x42, // ableton mode 2
+  (byte) 0x08, // version maj
+  (byte) 0x01, // version min
+  (byte) 0x01, // version bugfix
+  (byte) 0xf7, // sysex end
+};
+
 class MidiEngine {
-	
+
   private final LX lx;
 
   public MidiEngine(LX lx) {
 		this.lx = lx;
+
+    try {
+      setAPC40Mode();
+    } catch (java.lang.UnsatisfiedLinkError e){
+      return;
+    }
 
     LXMidiInput apcInput = APC40.matchInput(lx);
     if (apcInput != null) {
       println("Setting up APC40.");
 
 			final APC40 apc40 = APC40.getAPC40(lx);
-			apc40.setMode(APC40.MODE_ABLETON);
 
 			final LXChannel channel = lx.engine.getChannel(0);
 
@@ -61,4 +82,15 @@ class MidiEngine {
 			println("Did not find APC40 to setup.");
 		}
 	}
+  
+  void setAPC40Mode() {
+    int i = 0;
+    for (String info : de.humatic.mmj.MidiSystem.getOutputs()) { 
+      if (info.contains("APC40")) {
+        de.humatic.mmj.MidiSystem.openMidiOutput(i).sendMidi(APC_MODE_SYSEX);
+        break;
+      }
+      ++i;
+    }
+  }
 }
