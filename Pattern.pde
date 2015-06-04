@@ -1543,6 +1543,7 @@ class um3_lists extends LXPattern {
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
+//make this animation relative to deltaMs
 
 class Rods extends LXPattern {
   private final BasicParameter huerate = new BasicParameter("hue", 1, 0.25, 10);
@@ -1570,14 +1571,14 @@ class Rods extends LXPattern {
       rody.set(i, 1);  
       rodz.set(i, random(model.zMin, model.zMax));
       rodspeed.set(i, random(0.8, 2.6));
-      rodhue.set(i, random(0, 30));
+      rodhue.set(i, random(280, 310));
     }
   }
 
-  public void run(double deltaMx) {
+  public void run(double deltaMs) {
 
     int numRods = round(numberofrods.getValuef());
-  float rodsize = rodthick.getValuef();
+    float rodsize = rodthick.getValuef();
 
     for (LXPoint p : model.points) {
       colors[p.index] = 0;
@@ -1591,7 +1592,7 @@ class Rods extends LXPattern {
         rodz.set(i, random(model.zMin, model.zMax));
         rodhue.set(i, rodhue.get(i) + 1);  
         if (rodhue.get(i) > 360) {
-          rodhue.set(i, 1);
+          rodhue.set(i, 280);
         }
       }
     }
@@ -1615,4 +1616,96 @@ class Rods extends LXPattern {
   }
 }
 
+//-------------
+
+class block extends LXPattern {
+
+  final SinLFO growth = new SinLFO(10, 60, 3000);
+
+  float cubecenterx = model.cx;
+  float cubecentery = model.cy;
+  float cubecenterz = model.cz; 
+
+
+  public block(LX lx) {
+    super(lx);
+    addModulator(growth).trigger();
+  }
+
+  public boolean withinbounds(float center, float len, float position) 
+
+  {
+    return center - len/2 < position && position < center + len/2;
+  }
+
+  public void run(double deltaMs) {
+
+    float cubesize = growth.getValuef();
+    
+    if (growth.getValuef() < 11) {
+      cubecenterx = random(model.xMin, model.xMax);
+      cubecentery = random(model.yMin, model.yMax);
+      cubecenterz = random(model.zMin, model.zMax);
+    }
+
+ 
+
+
+    for (LXPoint p : model.points) {
+      
+      
+      if (withinbounds(cubecenterx, cubesize, p.x) && 
+        withinbounds(cubecentery, cubesize, p.y) && 
+        withinbounds(cubecenterz, cubesize, p.z)) {
+        colors[p.index] = lx.hsb(
+        lx.getBaseHuef(), 
+        random(70, 100), 
+        100);
+        }
+        else {
+          colors[p.index] = 0;
+        }
+      }
+    }
+  }
   
+  
+  class CandyCloud extends LXPattern {
+
+  final BasicParameter darkness = new BasicParameter("DARK", 8, 0, 12);
+
+  final BasicParameter scale = new BasicParameter("SCAL", 2400, 600, 10000);
+  final BasicParameter speed = new BasicParameter("SPD", 1, 1, 2);
+
+  double time = 0;
+
+  CandyCloud(LX lx) {
+    super(lx);
+
+    addParameter(darkness);
+  }
+
+  public void run(double deltaMs) {
+    if (getChannel().getFader().getNormalized() == 0) return;
+
+    time += deltaMs;
+    for (LXPoint p: model.points) {
+      double adjustedX = p.x / scale.getValue();
+      double adjustedY = p.y / scale.getValue();
+      double adjustedZ = p.z / scale.getValue();
+      double adjustedTime = time * speed.getValue() / 5000;
+
+      float hue = ((float)SimplexNoise.noise(adjustedX, adjustedY, adjustedZ, adjustedTime) + 1) / 2 * 1080 % 360;
+
+      float brightness = min(max((float)SimplexNoise.noise(p.x / 250, p.y / 250, p.z / 250 + 10000, time / 5000) * 8 + 8 - darkness.getValuef(), 0), 1) * 100;
+      
+      colors[p.index] = lx.hsb(hue, 100, brightness);
+    }
+  }
+}
+
+
+
+
+
+

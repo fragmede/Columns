@@ -14,6 +14,9 @@ import heronarts.p2lx.ui.control.*;
 import ddf.minim.*;
 import processing.opengl.*;
 import heronarts.lx.output.*;
+import toxi.geom.Vec2D;
+import toxi.math.noise.PerlinNoise;
+import toxi.math.noise.SimplexNoise;
 
 // Let's work in inches
 final static int INCHES = 1;
@@ -23,7 +26,7 @@ final static int FEET = 12*INCHES;
 Model model;
 P2LX lx;
 
-MidiEngine midiEngine;
+//MidiEngine midiEngine;
 
 LXPattern[] patterns;
 
@@ -39,6 +42,8 @@ void setup() {
   
   // Set the patterns
   patterns = new LXPattern[] {
+    new CandyCloud(lx),
+    new block(lx),
     new Rods(lx),
     new um3_lists(lx),
     new LayerDemoPattern(lx),
@@ -115,9 +120,9 @@ void setup() {
   lx.ui.addLayer(new UIComponentsDemo(lx.ui, width-144, 4));
 
 	// MIDI stuff (APC40)
-  midiEngine = new MidiEngine(lx);
+  //midiEngine = new MidiEngine(lx);
 
-  //buildOutputs();
+  buildOutputs();
 
 }
 
