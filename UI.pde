@@ -4,6 +4,20 @@
  * onDraw method and invoke Processing drawing methods directly.
  */
 
+String className(Object p, String suffix) {
+  String s = p.getClass().getName();
+  int li;
+  if ((li = s.lastIndexOf(".")) > 0) {
+    s = s.substring(li + 1);
+  }
+  if (s.indexOf("SugarCubes$") == 0) {
+    s = s.substring("SugarCubes$".length());
+  }
+  if ((suffix != null) && ((li = s.indexOf(suffix)) != -1)) {
+    s = s.substring(0, li);
+  }
+  return s;
+}
 
 class UIEngineControl extends UIWindow {
   
@@ -57,11 +71,11 @@ class UIComponentsDemo extends UIWindow {
     y += 24;
     
     new UIButton(4, y, width-8, 20)
-    .setActiveLabel("Boop!")
-    .setInactiveLabel("Momentary Button")
+    .setActiveLabel("Boom!")
+    .setInactiveLabel("Boom")
     .setMomentary(true)
     .addToContainer(this);
-    y += 24;
+     y += 24;
     
     for (int i = 0; i < 4; ++i) {
       new UIKnob(4 + i*34, y)
@@ -108,4 +122,5 @@ class UIComponentsDemo extends UIWindow {
     
     setSize(width, y);
   }
-} 
+}
+
