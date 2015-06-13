@@ -898,12 +898,12 @@ class DFC extends LXPattern {
 //--------------------------------Rainbowfadeauto------------------------------------------------------------
 
 class rainbowfadeauto extends LXPattern {
-  private final BasicParameter period = new BasicParameter("T", 1, 1, 1000);
-  private final BasicParameter speed = new BasicParameter("speed", .1, 0.02, .5);
+  //private final BasicParameter period = new BasicParameter("T", 1, .001, 1000);
+  private final BasicParameter speed = new BasicParameter("speed", 5, 5, 10);
   private final BasicParameter saturation = new BasicParameter("sat", 30, 0, 100);
-  private final SinLFO ysign = new SinLFO(1, -1, 6000 * period.getValuef());
-  private final SinLFO xsign = new SinLFO(-1, 1, 7000 * period.getValuef());
-  private final SinLFO zsign = new SinLFO(1, -1, 8000 * period.getValuef());
+  private final SinLFO ysign = new SinLFO(1, -1, 6000);
+  private final SinLFO xsign = new SinLFO(-1, 1, 7000);
+  private final SinLFO zsign = new SinLFO(1, -1, 8000);
   private final BasicParameter size = new BasicParameter("size", 2, 0.5, 15);
   //private final BasicParameter ysign = new BasicParameter("ys", -1, -1, 1);
   //private final BasicParameter xsign = new BasicParameter("xs", -1, -1, 1);
@@ -914,7 +914,7 @@ class rainbowfadeauto extends LXPattern {
     addParameter(speed);
     addParameter(saturation);
     addParameter(size);
-    addParameter(period);
+    //addParameter(period);
     addModulator(ysign).trigger();
     addModulator(xsign).trigger();
     addModulator(zsign).trigger();
@@ -923,9 +923,11 @@ class rainbowfadeauto extends LXPattern {
     //addParameter(zsign);
   }
   public void run(double deltaMs) {
+  
+    
     for (LXPoint p : model.points) {
       colors[p.index] = lx.hsb(
-      millis() * speed.getValuef() - ((ysign.getValuef())*p.y + (xsign.getValuef())*p.x + (zsign.getValuef())*p.z) * size.getValuef(), 
+      lx.getBaseHuef() * speed.getValuef() - ((ysign.getValuef())*p.y + (xsign.getValuef())*p.x + (zsign.getValuef())*p.z) * size.getValuef(), 
       saturation.getValuef(), 
       80);
     }
