@@ -141,7 +141,7 @@ void setup() {
   // MIDI stuff (APC40)
   midiEngine = new MidiEngine(lx);
 
-  buildOutputs();
+  //buildOutputs();
 }
 
 void draw() {

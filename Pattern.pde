@@ -1604,70 +1604,170 @@ class um3_lists extends LXPattern {
 //make this animation relative to deltaMs
 
 class Rods extends LXPattern {
-  private final BasicParameter huerate = new BasicParameter("hue", 1, 0.25, 10);
-  private final BasicParameter numberofrods = new BasicParameter("rods", 30, 5, 100);
-  private final BasicParameter falloff = new BasicParameter("fall", 2.8, 1, 8);
-  private final BasicParameter rodthick = new BasicParameter("thick", 3, 1, 30);
+  //private final BasicParameter huerate = new BasicParameter("hue", 88, 1, 360);
+  //private final BasicParameter hueup = new BasicParameter("hue", 88, 1, 360);
+  private final BasicParameter hue = new BasicParameter("hue", 300, 1, 320);
+  private final BasicParameter numberofrodsup = new BasicParameter("up", 15, 4, 100);
+  private final BasicParameter numberofrodsdown = new BasicParameter("down", 15, 4, 100);
+  private final BasicParameter speed = new BasicParameter("spd", 0.7, 0.3, 1.2);
+  //private final BasicParameter saturation = new BasicParameter("sat", 100, 0, 100);
+  //final SinLFO saturationup = new SinLFO(100, 0, 26432);
+  //final SinLFO saturationdown = new SinLFO(0, 100, 14421);
+ 
+ // private final BasicParameter falloff = new BasicParameter("fall", 2.8, 1, 8);
+ // private final BasicParameter rodthick = new BasicParameter("thick", 3, 1, 30);
 
-  int numRods = 100;
-  private final FloatList rodx = new FloatList();
-  private final FloatList rody = new FloatList();
-  private final FloatList rodz = new FloatList();
-  private final FloatList rodhue = new FloatList();
-  private final FloatList rodspeed = new FloatList();
-  private final FloatList distancefromrod = new FloatList();
-  float rodheight = model.yMax;
-
-  public Rods(LX lx) {
+public Rods(LX lx) {
     super(lx);
-    addParameter(huerate);
-    addParameter(numberofrods);
-    addParameter(falloff);
-    addParameter(rodthick);
-    for (int i = 0; i < numRods; i++) {
-      rodx.set(i, random(model.xMin, model.xMax));  
-      rody.set(i, 1);  
-      rodz.set(i, random(model.zMin, model.zMax));
-      rodspeed.set(i, random(0.8, 2.6));
-      rodhue.set(i, random(280, 310));
-    }
-  }
+    addLayer(new RodsDown(lx));
+    addLayer(new RodsUp(lx));
+    //addParameter(huerate);
+    addParameter(numberofrodsup);
+    addParameter(numberofrodsdown);
+    addParameter(hue);
+    //addParameter(saturation);
+    addParameter(speed);
+    //addModulator(saturationup).start();
+    //addModulator(saturationdown).start();
+    //addParameter(hueup);
+    //addParameter(falloff);
+    //addParameter(rodthick);
+} 
+public void run(double deltaMs) {
+    //The layers run automatically
+      for (LXPoint p : model.points) {
+        colors[p.index] = 0;
+      }  
 
-  public void run(double deltaMs) {
+}
+ private class RodsDown extends LXLayer { 
+ 
+    int numRods = 100;
+    private final FloatList rodx = new FloatList();
+    private final FloatList rody = new FloatList();
+    private final FloatList rodz = new FloatList();
+    private final FloatList rodhue = new FloatList();
+    private final FloatList rodspeed = new FloatList();
+    private final FloatList distancefromrod = new FloatList();
+    float rodheight = model.yMax;
 
-    int numRods = round(numberofrods.getValuef());
-    float rodsize = rodthick.getValuef();
-
-    for (LXPoint p : model.points) {
-      colors[p.index] = 0;
-    }
-
-    for (int i = 0; i < numRods; i++) {
-      rody.set(i, rody.get(i) + rodspeed.get(i));
-      if (rody.get(i) > model.yMax + rody.get(i)/2) {
+    private RodsDown(LX lx) {
+      super(lx);
+    
+      for (int i = 0; i < numRods; i++) {
         rodx.set(i, random(model.xMin, model.xMax));  
-        rody.set(i, model.yMin - rodheight/2);  
+        rody.set(i, 30);  
         rodz.set(i, random(model.zMin, model.zMax));
-        rodhue.set(i, rodhue.get(i) + 1);  
-        if (rodhue.get(i) > 360) {
-          rodhue.set(i, 280);
+        rodspeed.set(i, random(0.8, 2.6));
+      //  rodhue.set(i, random(280, 310));
+      }
+    }
+  
+    public void run(double deltaMs) {
+  
+      int numRods = round(numberofrodsdown.getValuef());
+      float rodsize = 3;
+  
+//      for (LXPoint p : model.points) {
+//        colors[p.index] = 0;
+//      }
+  
+      for (int i = 0; i < numRods; i++) {
+        rody.set(i, rody.get(i) - (rodspeed.get(i)*speed.getValuef()));
+        if (rody.get(i) < model.yMin - rody.get(i)/2) {
+          rodx.set(i, random(model.xMin, model.xMax));  
+          rody.set(i, model.yMax + rodheight/2);  
+          rodz.set(i, random(model.zMin, model.zMax));
+          //rodhue.set(i, rodhue.get(i) + 1);  
+          //if (rodhue.get(i) > 360) {
+          //  rodhue.set(i, 280);
+          //}
+        }
+      }
+  
+      for (LXPoint p : model.points) {
+  
+        for (int i = 0; i < numRods; i++) {
+  
+          float hv = hue.getValuef(); 
+          float rodius = abs(p.y - rody.get(i));
+          distancefromrod.set(i, rodius);
+          float bv = max(0, 100 - distancefromrod.get(i)*6);
+          if (p.x > rodx.get(i) - rodsize && p.x < rodx.get(i) + rodsize &&
+            p.z > rodz.get(i) - rodsize && p.z < rodz.get(i) + rodsize &&
+            p.y > rody.get(i) - rodheight/2 && p.y < rody.get(i) + rodheight/2)
+          {
+            colors[p.index] = lx.hsb(
+            hv, 
+            min(100, 100 - (abs(p.y - model.cy)*2.3)), 
+            bv);
+          }
         }
       }
     }
+  }
+ private class RodsUp extends LXLayer { 
+ 
+    int numRods = 100;
+    private final FloatList rodx = new FloatList();
+    private final FloatList rody = new FloatList();
+    private final FloatList rodz = new FloatList();
+    private final FloatList rodhue = new FloatList();
+    private final FloatList rodspeed = new FloatList();
+    private final FloatList distancefromrod = new FloatList();
+    float rodheight = model.yMax;
 
-    for (LXPoint p : model.points) {
-
+    private RodsUp(LX lx) {
+      super(lx);
+    
       for (int i = 0; i < numRods; i++) {
-
-        float hv = rodhue.get(i); 
-        float rodius = abs(p.y - rody.get(i));
-        distancefromrod.set(i, rodius);
-        float bv = max(0, 100 - distancefromrod.get(i)*falloff.getValuef());
-        if (p.x > rodx.get(i) - rodsize && p.x < rodx.get(i) + rodsize &&
-          p.z > rodz.get(i) - rodsize && p.z < rodz.get(i) + rodsize &&
-          p.y > rody.get(i) - rodheight/2 && p.y < rody.get(i) + rodheight/2)
-        {
-          colors[p.index] = lx.hsb(hv * huerate.getValuef(), 70, bv);
+        rodx.set(i, random(model.xMin, model.xMax));  
+        rody.set(i, 1);  
+        rodz.set(i, random(model.zMin, model.zMax));
+        rodspeed.set(i, random(0.8, 2.6));
+      //  rodhue.set(i, random(280, 310));
+      }
+    }
+  
+    public void run(double deltaMs) {
+  
+      int numRods = round(numberofrodsup.getValuef());
+      float rodsize = 3;
+  
+//      for (LXPoint p : model.points) {
+//        colors[p.index] = 0;
+//      }
+  
+      for (int i = 0; i < numRods; i++) {
+        rody.set(i, rody.get(i) + (rodspeed.get(i)*speed.getValuef()));
+        if (rody.get(i) > model.yMax + rody.get(i)/2) {
+          rodx.set(i, random(model.xMin, model.xMax));  
+          rody.set(i, model.yMin - rodheight/2);  
+          rodz.set(i, random(model.zMin, model.zMax));
+          //rodhue.set(i, rodhue.get(i) + 1);  
+          //if (rodhue.get(i) > 360) {
+          //  rodhue.set(i, 280);
+          //}
+        }
+      }
+  
+      for (LXPoint p : model.points) {
+  
+        for (int i = 0; i < numRods; i++) {
+  
+          float hv = hue.getValuef(); 
+          float rodius = abs(p.y - rody.get(i));
+          distancefromrod.set(i, rodius);
+          float bv = max(0, 100 - distancefromrod.get(i)*6);
+          if (p.x > rodx.get(i) - rodsize && p.x < rodx.get(i) + rodsize &&
+            p.z > rodz.get(i) - rodsize && p.z < rodz.get(i) + rodsize &&
+            p.y > rody.get(i) - rodheight/2 && p.y < rody.get(i) + rodheight/2)
+          {
+            colors[p.index] = lx.hsb(
+            (hv * 1.25) % 360, 
+            min(100, 100 - (abs(p.y - model.cy)*2.3)), 
+            bv);
+          }
         }
       }
     }
