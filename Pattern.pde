@@ -110,79 +110,122 @@ class LayerDemoPattern extends LXPattern {
 //***************************ASkewPlanes*********************************************
 
 class AskewPlanes extends LXPattern {
-private final BasicParameter saturation = new BasicParameter("sat", 60, 0, 100);
-//private final DiscreteParameter numplanes = new DiscreteParameter("num", 3, 1, 6);
-  
-  class Plane {
-    private final SinLFO a;
-    private final SinLFO b;
-    private final SinLFO c;
-    float av = 1;
-    float bv = 1;
-    float cv = 1;
-    float denom = 0.1;
-
-    Plane(int i) {
-      addModulator(a = new SinLFO(-1, 1, 4000 + 1029*i)).trigger();
-      addModulator(b = new SinLFO(-1, 1, 11000 - 1104*i)).trigger();
-      addModulator(c = new SinLFO(-50, 50, 4000 + 1000*i * ((i % 2 == 0) ? 1 : -1))).trigger();
-    }
-
-    void run(double deltaMs) {
-      av = a.getValuef();
-      bv = b.getValuef();
-      cv = c.getValuef();
-      denom = sqrt(av*av + bv*bv);
-    }
-  }
-
-  final Plane[] planes;
-  int NUM_PLANES = 3;
+  private final BasicParameter sat = new BasicParameter("sat", 1, 0.1, 10);
+  private final BasicParameter size = new BasicParameter("size", 5, 3, 20);
+  private final BasicParameter clr = new BasicParameter("clr", 126, 90, 340);
+  private final BasicParameter stars = new BasicParameter("Stars", 85, 0, 100);
 
   AskewPlanes(LX lx) {
     super(lx);
-    addParameter(saturation);
-    //addParameter(numplanes);
-    planes = new Plane[NUM_PLANES];
-    for (int i = 0; i < planes.length; ++i) {
-      planes[i] = new Plane(i);
+    addParameter(sat);
+    addParameter(size);
+    addParameter(clr);
+    addParameter(stars);
+    addLayer(new PlanesLayer(lx));
+    for (int i = 0; i < 800; ++i) {
+      addLayer(new StarLayer(lx));
     }
   }
 
   public void run(double deltaMs) {
-    float huev = lx.getBaseHuef();
-    //NUM_PLANES = numplanes.getValuei();
+  }
 
-    // This is super fucking bizarre. But if this is a for loop, the framerate
-    // tanks to like 30FPS, instead of 60. Call them manually and it works fine.
-    // Doesn't make ANY sense... there must be some weird side effect going on
-    // with the Processing internals perhaps?
-    //    for (Plane plane : planes) {
-    //      plane.run(deltaMs);
-    //    }
-    planes[0].run(deltaMs);
-    planes[1].run(deltaMs);
-    planes[2].run(deltaMs);
-    //planes[3].run(deltaMs);
-    //planes[4].run(deltaMs);
-    //planes[5].run(deltaMs);      
+  private class PlanesLayer extends LXLayer {
 
-    for (LXPoint p : model.points) {
-      float d = MAX_FLOAT;
-      for (Plane plane : planes) {
-        if (plane.denom != 0) {
-          d = min(d, abs(plane.av*(p.x-model.cx) + plane.bv*(p.y-model.cy) + plane.cv) / plane.denom);
-        }
+    class Plane {
+      private final SinLFO a;
+      private final SinLFO b;
+      private final SinLFO c;
+      float av = 1;
+      float bv = 1;
+      float cv = 1;
+      float denom = 0.1;
+
+      Plane(int i) {
+        addModulator(a = new SinLFO(-1, 1, 9324 + 1029*i)).trigger();
+        addModulator(b = new SinLFO(-1, 1, 11566 - 1104*i)).trigger();
+        addModulator(c = new SinLFO(-50, 50, 7421 + 1000*i * ((i % 2 == 0) ? 1 : -1))).trigger();
+      }  
+      void run(double deltaMs) {
+        av = a.getValuef();
+        bv = b.getValuef();
+        cv = c.getValuef();
+        denom = sqrt(av*av + bv*bv);
       }
-      colors[p.index] = lx.hsb(
-      (huev + abs(p.x-model.cx)*.3 + p.y*.8) % 360, 
-      //max(0, 100 - .8*abs(p.x - model.cx)),
-      saturation.getValuef(), 
-      constrain(140 - 10.*d, 0, 100)
-        );
+    }
+
+    final Plane[] planes;
+    int NUM_PLANES = 3;
+
+    private PlanesLayer(LX lx) {
+      super(lx);
+      planes = new Plane[NUM_PLANES];
+      for (int i = 0; i < planes.length; ++i) {
+        planes[i] = new Plane(i);
+      }
+    }
+    public void run(double deltaMs) { 
+      float huev = clr.getValuef();
+      //NUM_PLANES = numplanes.getValuei();
+
+      // This is super fucking bizarre. But if this is a for loop, the framerate
+      // tanks to like 30FPS, instead of 60. Call them manually and it works fine.
+      // Doesn't make ANY sense... there must be some weird side effect going on
+      // with the Processing internals perhaps?
+      //    for (Plane plane : planes) {
+      //      plane.run(deltaMs);
+      //    }
+      planes[0].run(deltaMs);
+      planes[1].run(deltaMs);
+      planes[2].run(deltaMs);
+      //planes[3].run(deltaMs);
+      //planes[4].run(deltaMs);
+      //planes[5].run(deltaMs);      
+
+      for (LXPoint p : model.points) {
+        float d = MAX_FLOAT;
+        for (Plane plane : planes) {
+          if (plane.denom != 0) {
+            d = min(d, abs(plane.av*(p.x-model.cx) + plane.bv*(p.y-model.cy) + plane.cv) / plane.denom);
+          }
+        }
+        colors[p.index] = lx.hsb(
+        (huev + abs(p.x-model.cx) + p.y) % 360, 
+        max(0, 100 - sat.getValuef()*abs(p.x - model.cx)), 
+        //saturation.getValuef(), 
+        constrain(140 - size.getValuef()*d, 0, 100)
+          );
+      }
+    }
+  }
+ private class StarLayer extends LXLayer {
+
+    private final TriangleLFO maxBright = new TriangleLFO(0, stars, random(2000, 8000));
+    private final SinLFO brightness = new SinLFO(-1, maxBright, random(3000, 9000)); 
+
+    private int index = 0;
+
+    private StarLayer(LX lx) { 
+      super(lx);
+      addModulator(maxBright).start();
+      addModulator(brightness).start();
+      pickStar();
+    }
+
+    private void pickStar() {
+      index = (int) random(0, model.size-1);
+    }
+
+    public void run(double deltaMs) {
+      if (brightness.getValuef() <= 0) {
+        pickStar();
+      } else {
+        addColor(index, LXColor.hsb(lx.getBaseHuef(), 50, brightness.getValuef()));
+      }
     }
   }
 }
+
 
 //********************************ShiftingPlanes******************************************************************
 //********************************ShiftingPlanes******************************************************************
@@ -898,13 +941,15 @@ class DFC extends LXPattern {
 //--------------------------------Rainbowfadeauto------------------------------------------------------------
 
 class rainbowfadeauto extends LXPattern {
-  //private final BasicParameter period = new BasicParameter("T", 1, .001, 1000);
-  private final BasicParameter speed = new BasicParameter("speed", 5, 5, 10);
-  private final BasicParameter saturation = new BasicParameter("sat", 30, 0, 100);
-  private final SinLFO ysign = new SinLFO(1, -1, 6000);
-  private final SinLFO xsign = new SinLFO(-1, 1, 7000);
-  private final SinLFO zsign = new SinLFO(1, -1, 8000);
-  private final BasicParameter size = new BasicParameter("size", 2, 0.5, 15);
+  //float period = 1000;
+  //private final BasicParameter periodT = new BasicParameter("T", 1, .001, 1000);
+  private final BasicParameter speed = new BasicParameter("speed", 5, .1, 25);
+  private final BasicParameter saturation = new BasicParameter("sat", 100, 0, 100);
+  private final BasicParameter bright = new BasicParameter("brite", 100, 40, 100);
+  private final SinLFO ysign = new SinLFO(1, -1, 10548);
+  private final SinLFO xsign = new SinLFO(-1, 1, 7893);
+  private final SinLFO zsign = new SinLFO(1, -1, 6211);
+  private final BasicParameter size = new BasicParameter("size", 2, 0.5, 8);
   //private final BasicParameter ysign = new BasicParameter("ys", -1, -1, 1);
   //private final BasicParameter xsign = new BasicParameter("xs", -1, -1, 1);
   //private final BasicParameter zsign = new BasicParameter("zs", -1, -1, 1);
@@ -914,7 +959,8 @@ class rainbowfadeauto extends LXPattern {
     addParameter(speed);
     addParameter(saturation);
     addParameter(size);
-    //addParameter(period);
+    addParameter(bright);
+    //addParameter(periodT);
     addModulator(ysign).trigger();
     addModulator(xsign).trigger();
     addModulator(zsign).trigger();
@@ -923,13 +969,13 @@ class rainbowfadeauto extends LXPattern {
     //addParameter(zsign);
   }
   public void run(double deltaMs) {
-  
-    
+
+
     for (LXPoint p : model.points) {
       colors[p.index] = lx.hsb(
       lx.getBaseHuef() * speed.getValuef() - ((ysign.getValuef())*p.y + (xsign.getValuef())*p.x + (zsign.getValuef())*p.z) * size.getValuef(), 
       saturation.getValuef(), 
-      80);
+      bright.getValuef());
     }
   }
 }
@@ -1666,7 +1712,7 @@ class block extends LXPattern {
         colors[p.index] = lx.hsb(
         lx.getBaseHuef(), 
         63, 
-       100);
+        100);
       } else {
         colors[p.index] = 0;
       }
@@ -1801,10 +1847,10 @@ class BoomEffect extends LXEffect {
       float huev = lx.getBaseHuef();
       for (LXPoint p : model.points) {
         addColor(p.index, lx.hsb(
-          huev,
-          satv,
-          constrain(brightv - falloffv*abs(boom.getValuef() - dist(p.x, 2*p.y, 3*p.z, model.xMax/2, model.yMax, model.zMax*1.5)), 0, 100)) 
-        );
+        huev, 
+        satv, 
+        constrain(brightv - falloffv*abs(boom.getValuef() - dist(p.x, 2*p.y, 3*p.z, model.xMax/2, model.yMax, model.zMax*1.5)), 0, 100)) 
+          );
       }
     }
   }
@@ -1846,4 +1892,471 @@ class BoomEffect extends LXEffect {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class Cascade extends LXPattern {
+
+  final BasicParameter size = new BasicParameter("SIZE", 10, 10, 50);
+  final BasicParameter rate = new BasicParameter("RATE", 3000, 1500, 6000);
+  final BasicParameter max = new BasicParameter("MAX", 1.9*model.cy, 1.9*model.cy, 1.9*model.yMax);
+  final BasicParameter min = new BasicParameter("MIN", 0, 0, model.cy);
+  final BasicParameter xColor = new BasicParameter("X-COLOR", 0);
+  final BasicParameter yColor = new BasicParameter("Y-COLOR", 0);
+
+  final SinLFO py = new SinLFO(min, max, rate);
+
+  Cascade(LX lx) {
+    super(lx);
+    addParameter(size);
+    addParameter(rate);
+    addParameter(min);
+    addParameter(max);
+    addParameter(xColor);
+    addParameter(yColor);
+
+    addModulator(py).start();
+  }
+
+  public void run(double deltaMs) {
+    for (LXPoint p : model.points) {
+      float hShift =
+        abs(p.x - model.cx) / model.xRange * 360 * xColor.getValuef() +
+        abs(p.y - model.cy) / model.yRange * 360 * yColor.getValuef();
+      colors[p.index] = lx.hsb(
+      max(30, (lx.getBaseHuef() + hShift + (p.x - model.cx)) % 360), 
+      100, 
+      max(150, (lx.getBaseHuef() + hShift + (p.y - model.cy)) % 360)
+        );
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class Strobe extends LXPattern {
+  final BasicParameter speed = new BasicParameter("SPEED", 100, 1, 100);
+  float time = 0.;
+
+  Strobe(LX lx) {
+    super(lx);
+    addParameter(speed);
+  }
+
+  public void run(double deltaMs) {
+    time += deltaMs * speed.getValuef();
+    float timeS = time / 1000.;
+
+    for (LXPoint p : model.points) {
+      colors[p.index] = lx.hsb(
+      50, 
+      100, 
+      75 * ((Math.round(timeS) % 2))
+        );
+    }
+  }
+}
+
+
+
+class Pulse extends LXPattern {
+  final BasicParameter speed = new BasicParameter("SPEED", 1, 0.1, 10);
+  final BasicParameter hue = new BasicParameter("hue", 45, 0, 360);
+  final BasicParameter saturation = new BasicParameter("sat", 100, 0, 100);
+  float time = 0.;
+
+  Pulse(LX lx) {
+    super(lx);
+    addParameter(speed);
+    addParameter(hue);
+    addParameter(saturation);
+  }
+
+  public void run(double deltaMs) {
+    time += deltaMs * speed.getValuef();
+    float timeS = time / 1000.;
+
+    for (LXPoint p : model.points) {
+      colors[p.index] = lx.hsb(
+      hue.getValuef(), 
+      saturation.getValuef(), 
+      100 * ((Math.round(timeS) % 2))
+        );
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class Bouncing extends LXPattern {
+
+  final BasicParameter size = new BasicParameter("SIZE", 1, 1, 5);
+  final BasicParameter rate = new BasicParameter("RATE", 2000, 1000, 4000);
+  final BasicParameter max = new BasicParameter("MAX", model.cy, model.cy, model.yMax);
+  final BasicParameter min = new BasicParameter("MIN", 0, 0, model.cy);
+
+  final SinLFO py = new SinLFO(min, max, rate);
+
+  Bouncing(LX lx) {
+    super(lx);
+    addParameter(size);
+    addParameter(rate);
+    addParameter(min);
+    addParameter(max);
+    addModulator(py).start();
+  }
+
+  public void run(double deltaMs) {
+    for (LXPoint p : model.points) {
+      colors[p.index] = lx.hsb(
+      0, 
+      100, 
+      max(0, 100 - (100/size.getValuef()) * abs(p.y - py.getValuef()))
+        );
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class ParameterWave extends LXPattern {
+
+  final BasicParameter amp = new BasicParameter("AMP", 1);
+  final BasicParameter speed = new BasicParameter("SPD", 0.5, -1, 1); 
+  final BasicParameter period = new BasicParameter("PERIOD", 0.5, 0.5, 5);
+  final BasicParameter thick = new BasicParameter("THICK", 2, 1, 5);
+  final BasicParameter xColor = new BasicParameter("X-COLOR", 0.5);
+  final BasicParameter yColor = new BasicParameter("Y-COLOR", 0.5);
+
+  private float base = 0;
+  private float altBase = 0;
+
+  ParameterWave(LX lx) {
+    super(lx);
+    addParameter(amp);
+    addParameter(speed);
+    addParameter(period);
+    addParameter(thick);
+    addParameter(xColor);
+    addParameter(yColor);
+  }
+
+  public void run(double deltaMs) {
+    base += deltaMs / 1000. * TWO_PI * speed.getValuef();
+
+    altBase += deltaMs / 1000. * TWO_PI * (speed.getValuef() * 1.23);
+
+    for (LXPoint p : model.points) {
+      float svy = model.cy + amp.getValuef() * model.yRange/2.*sin(base + (p.x - model.cx) / model.xRange * TWO_PI * period.getValuef());
+      float hShift =
+        abs(p.x - model.cx) / model.xRange * 360 * xColor.getValuef() +
+        abs(p.y - model.cy) / model.yRange * 360 * yColor.getValuef();
+      color clr = lx.hsb(
+      (lx.getBaseHuef() + hShift) % 360, 
+      100, 
+      max(0, 100 - (100 / (thick.getValuef()*FEET)) * abs(p.y - svy))
+        );
+
+      float svy2 = model.cy + amp.getValuef() * model.yRange/2.*sin(altBase + (p.x - model.cx) / model.xRange * TWO_PI * period.getValuef());
+      float hShift2 =
+        abs(p.x) / model.xRange * 360 * xColor.getValuef() +
+        abs(p.y) / model.yRange * 360 * yColor.getValuef();
+
+      float bri = constrain(max(0, 100 - (100 / (thick.getValuef()*FEET)) * abs(p.y - svy2)), 0, 100);
+      float sat;
+      if (bri > brightness(clr)) {
+        sat = 100;
+      } else {
+        bri = brightness(clr);
+        sat = saturation(clr);
+      }
+      colors[p.index] = lx.hsb(
+      (hue(clr) + (lx.getBaseHuef() + hShift2)) % 360, 
+      sat, 
+      bri
+        );
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+class Fire extends LXPattern {
+ 
+ private class Flame {
+ public float fheight;
+ public float x;
+ public float z;
+ public int flametimercounter;
+ 
+ public Flame (float fheight, float x, float y){
+ this.fheight = fheight;
+ this.x=x;
+ this.z=z;
+ this.flametimercounter=0;
+ }
+ }
+ 
+ //parameters go here
+ ArrayList<Flame> flames = new ArrayList<Flame>();
+ float addthis;
+ int distancefromflame;
+ boolean addorsubtract=true;
+ 
+ PImage fireColors = loadImage("Fire.png");
+ 
+ Fire(LX lx) {
+ super(lx);
+ 
+ Flame a_flame = new Flame((model.yMax-model.yMin) * 0.7, (model.xMax-model.xMin) * 0.5, (model.zMax-model.zMin) * 0.5);
+ flames.add(a_flame);
+ }
+ 
+ public void run(double deltaMS){
+ for (Flame a_flame: flames) {
+ a_flame.flametimercounter+=1;
+ if (a_flame.flametimercounter > 10000){
+ a_flame.flametimercounter=0;
+ }
+ addthis = (model.yMax-model.yMin) * random(10)/100;
+ if (random(10,10000)== a_flame.flametimercounter){
+ addorsubtract=!addorsubtract;
+ }
+ if (addorsubtract){
+ a_flame.fheight+=addthis;
+ }
+ else {
+ a_flame.fheight-=addthis;
+ }
+ }
+ for (LXPoint p : model.points){
+ float distancefromflame = 2;
+ float heightofsaidflame = 1;
+ for (Flame a_flame: flames) {
+ float the_distance = sqrt(pow(p.x-a_flame.x,2)+pow(p.z-a_flame.z,2));
+ the_distance = the_distance / (model.xMax-model.xMin);
+ if (the_distance < distancefromflame){
+ distancefromflame=the_distance;
+ heightofsaidflame = a_flame.fheight;
+ }
+ }
+ float position_on_spectrum = abs(heightofsaidflame - p.y) - distancefromflame;
+ float hoo = fireColors.get(1, int((position_on_spectrum+1)/(2*fireColors.height)));
+ // println(hoo);
+ colors[p.index] = lx.hsb(hoo,100,100);
+ //Make a spectrum that goes black-red-yellow-red-black and from -1 to 1 with 0 being the yellow in the middle
+ //set the color of the LED based on the variable position_on_spectrum on that spectrum
+ }
+ }
+ }
+ 
+/*
+ 
+/*
+ //--------------------------------------------fire----------------------------------------------------------------------------------------
+ class Fire extends LXPattern {
+ final BasicParameter maxHeight = new BasicParameter("HEIGHT", 0.8, 0.3, 1);
+ final BasicParameter flameSize = new BasicParameter("SIZE", 30, 10, 75);  
+ final BasicParameter flameCount = new BasicParameter ("FLAMES", 75, 0, 75);
+ final BasicParameter hue = new BasicParameter("HUE", 0, 0, 360);
+ private LinearEnvelope fireHeight = new LinearEnvelope(0,0,500);
+ 
+ private float height = 0;
+ private int numFlames = 75;
+ private Flame[] flames;
+ 
+ private class Flame {
+ public float flameHeight = 0;
+ public float theta = random(0, 360);
+ public LinearEnvelope decay = new LinearEnvelope(0,0,0);
+ 
+ public Flame(float maxHeight, boolean groundStart){
+ float flameHeight = random(0, maxHeight);
+ decay.setRange(75, model.yMax * flameHeight, 1200 * flameHeight);
+ if (!groundStart) {
+ decay.setBasis(random(0,1));
+ }
+ addModulator(decay).start();
+ }
+ }
+ 
+ Fire(LX lx) {
+ super(lx);
+ 
+ //patternMode = PATTERN_MODE_CUSTOM;
+ 
+ addParameter(maxHeight);
+ addParameter(flameSize);
+ addParameter(flameCount);
+ addParameter(hue);
+ addModulator(fireHeight);
+ 
+ flames = new Flame[numFlames];
+ for (int i = 0; i < numFlames; ++i) {
+ flames[i] = new Flame(height, false);
+ }
+ }
+ 
+ public void updateNumFlames(int numFlames) {
+ Flame[] newFlames = Arrays.copyOf(flames, numFlames);
+ if (flames.length < numFlames) {
+ for (int i = flames.length; i < numFlames; ++i) {
+ newFlames[i] = new Flame(height, false);
+ }
+ }
+ flames = newFlames;
+ }
+ 
+ public void run(double deltaMs) {
+ if (true) {
+ if (getChannel().getFader().getNormalized() == 0) return;
+ 
+ height = maxHeight.getValuef();
+ numFlames = (int) flameCount.getValuef();
+ } else {
+ height = fireHeight.getValuef();
+ }
+ 
+ if (flames.length != numFlames) {
+ updateNumFlames(numFlames);
+ }
+ for (int i = 0; i < flames.length; ++i) {
+ if (flames[i].decay.finished()) {
+ removeModulator(flames[i].decay);
+ flames[i] = new Flame(height, true);
+ }
+ }
+ 
+ for (LXPoint p: model.points ) {
+ float yn = p.y / model.yMax;
+ float cBrt = 0;
+ float cHue = 0;
+ float flameWidth = flameSize.getValuef();
+ for (int i = 0; i < flames.length; ++i) {
+ if (abs(flames[i].theta - p.x) < (flameWidth * (1- yn))) {
+ cBrt = min(100, max(0, 100 + cBrt- 2 * abs(p.y - flames[i].decay.getValuef()) - flames[i].decay.getBasisf() * 25)) ;
+ cHue = max(0,  (cHue + cBrt * 0.7) * 0.5);
+ }
+ }
+ colors[p.index] = lx.hsb(
+ (cHue + hue.getValuef()) % 360,
+ 100,
+ min(100, cBrt + (float) Math.pow(height, 0.25) * (1 - yn)  * (1 - yn) * 75)
+ );
+ }
+ }
+ }
+ 
+ */
 

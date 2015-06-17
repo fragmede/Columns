@@ -27,6 +27,7 @@ import toxi.math.noise.SimplexNoise;
 final static int INCHES = 1;
 final static int FEET = 12*INCHES;
 
+
 // Top-level, we have a model and a P2LX instance
 Model             model;
 P2LX              lx;
@@ -39,7 +40,6 @@ LXPattern[]       patterns;
 // Setup establishes the windowing and LX constructs
 void setup() {
   size(800, 600, OPENGL);
-
   // Create the model, which describes where our light points are
   model = new Model();
 
@@ -48,6 +48,12 @@ void setup() {
 
   // Set the patterns
   patterns = new LXPattern[] {
+    new Cascade(lx),
+    new Strobe(lx),
+    new Pulse(lx),
+    new Bouncing(lx),
+    new ParameterWave(lx),
+    //new Fire(lx),
     new Rods(lx), 
     new um3_lists(lx), 
     new CrossSections(lx),
