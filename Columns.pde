@@ -48,20 +48,24 @@ void setup() {
 
   // Set the patterns
   patterns = new LXPattern[] {
+    new AskewPlanes(lx),
+    new rainbowfadeauto(lx),
+    new Rods(lx),
+    new MultiSine(lx), 
     new Cascade(lx),
     new Strobe(lx),
     new Pulse(lx),
     new Bouncing(lx),
     new ParameterWave(lx),
     //new Fire(lx),
-    new Rods(lx), 
+     
     new um3_lists(lx), 
     new CrossSections(lx),
     new SparkleHelix(lx), 
     new CandyCloud(lx), 
-    new rainbowfadeauto(lx),
+    
     new rainbowfade(lx),
-    new AskewPlanes(lx), 
+     
     new Twinkle(lx), 
     new LayerDemoPattern(lx), 
     new IteratorTestPattern(lx).setTransition(new DissolveTransition(lx)), 
@@ -80,7 +84,7 @@ void setup() {
      
     new DFC(lx), 
      
-    new MultiSine(lx), 
+    
     new SparkleTakeOver(lx), 
     
     new um(lx), 
@@ -141,7 +145,7 @@ void setup() {
   // MIDI stuff (APC40)
   midiEngine = new MidiEngine(lx);
 
-  //buildOutputs();
+  buildOutputs();
 }
 
 void draw() {

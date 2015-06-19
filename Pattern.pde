@@ -112,8 +112,8 @@ class LayerDemoPattern extends LXPattern {
 class AskewPlanes extends LXPattern {
   private final BasicParameter sat = new BasicParameter("sat", 1, 0.1, 10);
   private final BasicParameter size = new BasicParameter("size", 5, 3, 20);
-  private final BasicParameter clr = new BasicParameter("clr", 126, 90, 340);
-  private final BasicParameter stars = new BasicParameter("Stars", 85, 0, 100);
+  private final BasicParameter clr = new BasicParameter("clr", 256, 90, 340);
+  private final BasicParameter stars = new BasicParameter("Stars", 85, 35, 100);
 
   AskewPlanes(LX lx) {
     super(lx);
@@ -944,12 +944,12 @@ class rainbowfadeauto extends LXPattern {
   //float period = 1000;
   //private final BasicParameter periodT = new BasicParameter("T", 1, .001, 1000);
   private final BasicParameter speed = new BasicParameter("speed", 5, .1, 25);
-  private final BasicParameter saturation = new BasicParameter("sat", 100, 0, 100);
+  private final BasicParameter saturation = new BasicParameter("sat", 100, 30, 100);
   private final BasicParameter bright = new BasicParameter("brite", 100, 40, 100);
   private final SinLFO ysign = new SinLFO(1, -1, 10548);
   private final SinLFO xsign = new SinLFO(-1, 1, 7893);
   private final SinLFO zsign = new SinLFO(1, -1, 6211);
-  private final BasicParameter size = new BasicParameter("size", 2, 0.5, 8);
+  private final BasicParameter size = new BasicParameter("size", 2, 1.4, 8);
   //private final BasicParameter ysign = new BasicParameter("ys", -1, -1, 1);
   //private final BasicParameter xsign = new BasicParameter("xs", -1, -1, 1);
   //private final BasicParameter zsign = new BasicParameter("zs", -1, -1, 1);
@@ -990,12 +990,13 @@ class MultiSine extends LXPattern {
       10, 50, 10
     }
   }; 
-  final BasicParameter brightEffect = new BasicParameter("Bright", 100, 0, 100);
-
+  final BasicParameter brightEffect = new BasicParameter("Bright", 6, 4, 10);
+  final BasicParameter colorspread = new BasicParameter("clr", 20, 10, 40);
+  final BasicParameter saturation = new BasicParameter("sat", 90, 15, 90);
   final BasicParameter[] timingSettings = {
-    new BasicParameter("T1", 6300, 5000, 30000), 
-    new BasicParameter("T2", 4300, 2000, 10000), 
-    new BasicParameter("T3", 11000, 10000, 20000)
+    new BasicParameter("T1", 6300, 5000, 300000), 
+    new BasicParameter("T2", 4300, 2000, 100000), 
+    new BasicParameter("T3", 11000, 10000, 200000)
     };
   SinLFO[] frequencies = {
     new SinLFO(0, 1, timingSettings[0]), 
@@ -1007,8 +1008,11 @@ class MultiSine extends LXPattern {
       for (int i = 0; i < numLayers; i++) {
         addParameter(timingSettings[i]);
         addModulator(frequencies[i]).start();
+        
       }
       addParameter(brightEffect);
+      addParameter(saturation);
+      addParameter(colorspread);
     }
 
   public void run(double deltaMs) {
@@ -1022,9 +1026,9 @@ class MultiSine extends LXPattern {
         combinedDistanceSines[0] += sin(TWO_PI * frequencies[i].getValuef() + p.y / distLayerDivisors[0][i]) / numLayers;
         combinedDistanceSines[1] += sin(TWO_PI * frequencies[i].getValuef() + TWO_PI*(p.z / distLayerDivisors[1][i])) / numLayers;
       }
-      float hueVal = (lx.getBaseHuef() + 20 * sin(TWO_PI * 0.7*(combinedDistanceSines[0] + combinedDistanceSines[1]))) % 360;
-      float brightVal = (100 - brightEffect.getValuef()) + brightEffect.getValuef() * (2 + combinedDistanceSines[0] + combinedDistanceSines[1]) / 6;
-      float satVal = 90 + 10 * sin(TWO_PI * (combinedDistanceSines[0] + combinedDistanceSines[1]));
+      float hueVal = (lx.getBaseHuef() + colorspread.getValuef() * sin(TWO_PI * 1.2*(combinedDistanceSines[0] + combinedDistanceSines[1]))) % 360;
+      float brightVal = (100 - 100) + 100 * (2 + combinedDistanceSines[0] + combinedDistanceSines[1]) / brightEffect.getValuef();
+      float satVal = saturation.getValuef() + 10 * sin(TWO_PI * (combinedDistanceSines[0] + combinedDistanceSines[1]));
       colors[p.index] = lx.hsb(hueVal, satVal, brightVal);
     }
   }
@@ -1506,10 +1510,10 @@ class SweepPattern extends LXPattern {
 class um3_lists extends LXPattern {
 
 
-  private final BasicParameter saturation = new BasicParameter("sat", 45, 0, 100);
-  private final BasicParameter dots = new BasicParameter("dots", 6, 1, 15);
-  private final BasicParameter bright = new BasicParameter("bright", .4, 0.15, 4);
-  private final BasicParameter huefactor = new BasicParameter("hue", 1, 0.25, 4);
+  private final BasicParameter saturation = new BasicParameter("sat", 45, 0, 70);
+  private final BasicParameter dots = new BasicParameter("dots", 6, 1, 8);
+  private final BasicParameter bright = new BasicParameter("bright", .4, 0.3, .6);
+  private final BasicParameter huefactor = new BasicParameter("hue", 1, 0.25, 1.25);
 
 
 
@@ -1692,7 +1696,7 @@ public void run(double deltaMs) {
           float hv = hue.getValuef(); 
           float rodius = abs(p.y - rody.get(i));
           distancefromrod.set(i, rodius);
-          float bv = max(0, 100 - distancefromrod.get(i)*6);
+          float bv = max(0, 100 - distancefromrod.get(i)*4);
           if (p.x > rodx.get(i) - rodsize && p.x < rodx.get(i) + rodsize &&
             p.z > rodz.get(i) - rodsize && p.z < rodz.get(i) + rodsize &&
             p.y > rody.get(i) - rodheight/2 && p.y < rody.get(i) + rodheight/2)
@@ -1758,13 +1762,13 @@ public void run(double deltaMs) {
           float hv = hue.getValuef(); 
           float rodius = abs(p.y - rody.get(i));
           distancefromrod.set(i, rodius);
-          float bv = max(0, 100 - distancefromrod.get(i)*6);
+          float bv = max(0, 100 - distancefromrod.get(i)*4);
           if (p.x > rodx.get(i) - rodsize && p.x < rodx.get(i) + rodsize &&
             p.z > rodz.get(i) - rodsize && p.z < rodz.get(i) + rodsize &&
             p.y > rody.get(i) - rodheight/2 && p.y < rody.get(i) + rodheight/2)
           {
             colors[p.index] = lx.hsb(
-            (hv * 1.25) % 360, 
+            (hv * 1.4) % 360, 
             min(100, 100 - (abs(p.y - model.cy)*2.3)), 
             bv);
           }
