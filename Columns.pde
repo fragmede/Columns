@@ -62,8 +62,8 @@ void setup() {
     new um3_lists(lx), 
     new CrossSections(lx),
     new SparkleHelix(lx), 
-    new CandyCloud(lx), 
-    
+    //new CandyCloud(lx), 
+    new candytwinkle(lx),
     new rainbowfade(lx),
      
     new Twinkle(lx), 

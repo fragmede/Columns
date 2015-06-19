@@ -1544,7 +1544,7 @@ class um3_lists extends LXPattern {
     //int NUM_OF_DOTS = round(dots.getValuef());
 
     for (int i = 0; i < NUM_OF_DOTS; i++) {
-      fadetimes.add(new SawLFO(1, 0.01, int(random(1000, 10000))));
+      fadetimes.add(new SawLFO(1, 0.01, int(random(5000, 15000))));
       pointx.append( random(model.xMin, model.xMax) );
       pointy.append( random(model.xMin, model.xMax) );
       pointz.append( random(model.xMin, model.xMax) );
@@ -1825,7 +1825,23 @@ class block extends LXPattern {
 }
 
 
-class CandyCloud extends LXPattern {
+class candytwinkle extends LXPattern {
+  
+  private final BasicParameter stars = new BasicParameter("Stars", 100, 0, 100);
+  public candytwinkle(LX lx) {
+    super(lx);
+    addLayer(new CandyCloud(lx)); 
+    for (int i = 0; i < 800; ++i) {
+      addLayer(new StarLayer(lx));
+    }
+    addParameter(stars); 
+  }
+  public void run(double deltaMs) {
+    // The layers run automatically
+  }
+
+private class CandyCloud extends LXLayer {
+  
 
   final BasicParameter darkness = new BasicParameter("DARK", 8, 0, 12);
 
@@ -1861,6 +1877,46 @@ class CandyCloud extends LXPattern {
   }
 }
 
+   private class StarLayer extends LXLayer {
+
+    private final TriangleLFO maxBright = new TriangleLFO(0, stars, random(2000, 8000));
+    private final SinLFO brightness = new SinLFO(-1, maxBright, random(3000, 9000)); 
+
+    private int index = 0;
+
+    private StarLayer(LX lx) { 
+      super(lx);
+      addModulator(maxBright).start();
+      addModulator(brightness).start();
+      pickStar();
+    }
+
+    private void pickStar() {
+      index = (int) random(0, model.size-1);
+    }
+
+    public void run(double deltaMs) {
+      if (brightness.getValuef() <= 0) {
+        pickStar();
+      } else {
+        addColor(index, LXColor.hsb(lx.getBaseHuef(), 50, brightness.getValuef()));
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+//====================================================================
 class Twinkle extends LXPattern {
 
   private SinLFO[] bright;
