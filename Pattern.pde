@@ -111,7 +111,7 @@ class LayerDemoPattern extends LXPattern {
 
 class AskewPlanes extends LXPattern {
   private final BasicParameter sat = new BasicParameter("sat", 1, 0.1, 10);
-  private final BasicParameter size = new BasicParameter("size", 5, 3, 20);
+  private final BasicParameter size = new BasicParameter("size", 18, 3, 20);
   private final BasicParameter clr = new BasicParameter("clr", 256, 90, 340);
   private final BasicParameter stars = new BasicParameter("Stars", 85, 35, 100);
 
@@ -122,7 +122,7 @@ class AskewPlanes extends LXPattern {
     addParameter(clr);
     addParameter(stars);
     addLayer(new PlanesLayer(lx));
-    for (int i = 0; i < 800; ++i) {
+    for (int i = 0; i < 600; ++i) {
       addLayer(new StarLayer(lx));
     }
   }
@@ -1825,16 +1825,22 @@ class block extends LXPattern {
 }
 
 
-class candytwinkle extends LXPattern {
+class candycloudstar extends LXPattern {
   
-  private final BasicParameter stars = new BasicParameter("Stars", 100, 0, 100);
-  public candytwinkle(LX lx) {
+  final BasicParameter darkness = new BasicParameter("DARK", 8, 7.5, 8.5);
+  final BasicParameter scale = new BasicParameter("SCAL", 2400, 500, 5000);
+  final BasicParameter speed = new BasicParameter("SPD", 1, 1, 2);
+  private final BasicParameter stars = new BasicParameter("Stars", 90, 30, 100);
+ 
+  public candycloudstar(LX lx) {
     super(lx);
     addLayer(new CandyCloud(lx)); 
-    for (int i = 0; i < 800; ++i) {
+    for (int i = 0; i < 600; ++i) {
       addLayer(new StarLayer(lx));
     }
-    addParameter(stars); 
+    addParameter(stars);
+    addParameter(scale);
+    addParameter(darkness); 
   }
   public void run(double deltaMs) {
     // The layers run automatically
@@ -1843,19 +1849,13 @@ class candytwinkle extends LXPattern {
 private class CandyCloud extends LXLayer {
   
 
-  final BasicParameter darkness = new BasicParameter("DARK", 8, 0, 12);
 
-  final BasicParameter scale = new BasicParameter("SCAL", 2400, 600, 10000);
-  final BasicParameter speed = new BasicParameter("SPD", 1, 1, 2);
 
   double time = 0;
 
   CandyCloud(LX lx) {
     super(lx);
 
-    addParameter(darkness);
-    addParameter(scale);
-    addParameter(speed);
   }
 
   public void run(double deltaMs) {
@@ -1870,7 +1870,7 @@ private class CandyCloud extends LXLayer {
 
       float hue = ((float)SimplexNoise.noise(adjustedX, adjustedY, adjustedZ, adjustedTime) + 1) / 2 * 1080 % 360;
 
-      float brightness = min(max((float)SimplexNoise.noise(p.x / 250, p.y / 250, p.z / 250 + 10000, time / 5000) * 8 + 8 - darkness.getValuef(), 0), 1) * 100;
+      float brightness = min(max((float)SimplexNoise.noise(p.x / 100, p.y / 100, p.z / 100 + 10000, time / 5000) * 2 + 8 - darkness.getValuef(), 0), 1) * 100;
 
       colors[p.index] = lx.hsb(hue, 100, brightness);
     }
@@ -1899,7 +1899,7 @@ private class CandyCloud extends LXLayer {
       if (brightness.getValuef() <= 0) {
         pickStar();
       } else {
-        addColor(index, LXColor.hsb(lx.getBaseHuef(), 50, brightness.getValuef()));
+        addColor(index, LXColor.hsb(lx.getBaseHuef(), 0, brightness.getValuef()));
       }
     }
   }
@@ -2271,8 +2271,10 @@ class ParameterWave extends LXPattern {
   final BasicParameter speed = new BasicParameter("SPD", 0.5, -1, 1); 
   final BasicParameter period = new BasicParameter("PERIOD", 0.5, 0.5, 5);
   final BasicParameter thick = new BasicParameter("THICK", 2, 1, 5);
-  final BasicParameter xColor = new BasicParameter("X-COLOR", 0.5);
-  final BasicParameter yColor = new BasicParameter("Y-COLOR", 0.5);
+  final BasicParameter xColor = new BasicParameter("X-COLOR", 0);
+  final BasicParameter yColor = new BasicParameter("Y-COLOR", 0);
+  final SinLFO thickness = new SinLFO(1, 5, 6324);
+  final SinLFO amplitude = new SinLFO(0, 1, 9422);
 
   private float base = 0;
   private float altBase = 0;
@@ -2285,6 +2287,8 @@ class ParameterWave extends LXPattern {
     addParameter(thick);
     addParameter(xColor);
     addParameter(yColor);
+    addModulator(thickness).start();
+    addModulator(amplitude).start();
   }
 
   public void run(double deltaMs) {
@@ -2293,22 +2297,22 @@ class ParameterWave extends LXPattern {
     altBase += deltaMs / 1000. * TWO_PI * (speed.getValuef() * 1.23);
 
     for (LXPoint p : model.points) {
-      float svy = model.cy + amp.getValuef() * model.yRange/2.*sin(base + (p.x - model.cx) / model.xRange * TWO_PI * period.getValuef());
+      float svy = model.cy + amplitude.getValuef() * model.yRange/2.*sin(base + (p.x - model.cx) / model.xRange * TWO_PI * period.getValuef());
       float hShift =
         abs(p.x - model.cx) / model.xRange * 360 * xColor.getValuef() +
         abs(p.y - model.cy) / model.yRange * 360 * yColor.getValuef();
       color clr = lx.hsb(
       (lx.getBaseHuef() + hShift) % 360, 
       100, 
-      max(0, 100 - (100 / (thick.getValuef()*FEET)) * abs(p.y - svy))
+      max(0, 100 - (100 / (thickness.getValuef()*FEET)) * abs(p.y - svy))
         );
 
-      float svy2 = model.cy + amp.getValuef() * model.yRange/2.*sin(altBase + (p.x - model.cx) / model.xRange * TWO_PI * period.getValuef());
+      float svy2 = model.cy + amplitude.getValuef() * model.yRange/2.*sin(altBase + (p.x - model.cx) / model.xRange * TWO_PI * period.getValuef());
       float hShift2 =
         abs(p.x) / model.xRange * 360 * xColor.getValuef() +
         abs(p.y) / model.yRange * 360 * yColor.getValuef();
 
-      float bri = constrain(max(0, 100 - (100 / (thick.getValuef()*FEET)) * abs(p.y - svy2)), 0, 100);
+      float bri = constrain(max(0, 100 - (100 / (thickness.getValuef()*FEET)) * abs(p.y - svy2)), 0, 100);
       float sat;
       if (bri > brightness(clr)) {
         sat = 100;

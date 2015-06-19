@@ -52,18 +52,21 @@ void setup() {
     new rainbowfadeauto(lx),
     new Rods(lx),
     new MultiSine(lx), 
+    new candycloudstar(lx),
+    new ParameterWave(lx),
+    new CrossSections(lx),
     new Cascade(lx),
     new Strobe(lx),
     new Pulse(lx),
     new Bouncing(lx),
-    new ParameterWave(lx),
+    
     //new Fire(lx),
      
     new um3_lists(lx), 
     new CrossSections(lx),
     new SparkleHelix(lx), 
     //new CandyCloud(lx), 
-    new candytwinkle(lx),
+    
     new rainbowfade(lx),
      
     new Twinkle(lx), 
@@ -145,7 +148,7 @@ void setup() {
   // MIDI stuff (APC40)
   midiEngine = new MidiEngine(lx);
 
-  buildOutputs();
+  //buildOutputs();
 }
 
 void draw() {
