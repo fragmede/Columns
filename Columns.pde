@@ -55,24 +55,17 @@ void setup() {
     new candycloudstar(lx),
     new ParameterWave(lx),
     new CrossSections(lx),
+    new um3_lists(lx), 
     new Cascade(lx),
     new Strobe(lx),
     new Pulse(lx),
     new Bouncing(lx),
-    
-    //new Fire(lx),
-     
-    new um3_lists(lx), 
     new CrossSections(lx),
     new SparkleHelix(lx), 
-    //new CandyCloud(lx), 
-    
-    new rainbowfade(lx),
-     
+    new rainbowfade(lx),  
     new Twinkle(lx), 
     new LayerDemoPattern(lx), 
-    new IteratorTestPattern(lx).setTransition(new DissolveTransition(lx)), 
-    
+    new IteratorTestPattern(lx).setTransition(new DissolveTransition(lx)),  
     new ShiftingPlane(lx), 
     new Pulley(lx), 
     //new BouncyBalls(lx),
@@ -83,13 +76,9 @@ void setup() {
     new CrazyWaves(lx), 
     new xwave(lx), 
     new ywave(lx), 
-    new zwave(lx), 
-     
-    new DFC(lx), 
-     
-    
+    new zwave(lx),   
+    new DFC(lx),  
     new SparkleTakeOver(lx), 
-    
     new um(lx), 
     new um2(lx), 
     //new um3(lx),
@@ -148,7 +137,7 @@ void setup() {
   // MIDI stuff (APC40)
   midiEngine = new MidiEngine(lx);
 
-  //buildOutputs();
+  buildOutputs();
 }
 
 void draw() {

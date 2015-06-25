@@ -2,109 +2,6 @@
  * This file has a bunch of example patterns, each illustrating the key
  * concepts and tools of the LX framework.
  */
-
-class LayerDemoPattern extends LXPattern {
-
-  private final BasicParameter colorSpread = new BasicParameter("Clr", 0, 0, 100);
-  private final BasicParameter stars = new BasicParameter("Stars", 0, 0, 100);
-  private final BasicParameter saturation = new BasicParameter("sat", 100, 0, 100);
-
-  public LayerDemoPattern(LX lx) {
-    super(lx);
-    addParameter(colorSpread);
-    addParameter(stars);
-    addParameter(saturation);
-    addLayer(new CircleLayer(lx));
-    addLayer(new RodLayer(lx));
-    for (int i = 0; i < 800; ++i) {
-      addLayer(new StarLayer(lx));
-    }
-  }
-
-  public void run(double deltaMs) {
-    // The layers run automatically
-  }
-
-  private class CircleLayer extends LXLayer {
-
-    private final SinLFO xPeriod = new SinLFO(1000, 3200, 1000); 
-    private final SinLFO brightnessX = new SinLFO(model.xMin, model.xMax, xPeriod);
-
-    private CircleLayer(LX lx) {
-      super(lx);
-      addModulator(xPeriod).start();
-      addModulator(brightnessX).start();
-    }
-
-    public void run(double deltaMs) {
-      // The layers run automatically
-      float falloff = 100 / (FEET);
-      for (LXPoint p : model.points) {
-        float yWave = model.yRange/4 * sin(p.x / model.xRange * PI); 
-        float distanceFromCenter = dist(p.x, p.y, model.cx, model.cy);
-        float distanceFromBrightness = dist(p.x, abs(p.y - model.cy), brightnessX.getValuef(), yWave);
-        colors[p.index] = LXColor.hsb(
-        lx.getBaseHuef() + colorSpread.getValuef() * distanceFromCenter, 
-        60, 
-        max(0, 100 - falloff*distanceFromBrightness)
-          );
-      }
-    }
-  }
-
-  private class RodLayer extends LXLayer {
-
-    private final SinLFO zPeriod = new SinLFO(800, 1000, 2000);
-    private final SinLFO zPos = new SinLFO(model.zMin, model.zMax, zPeriod);
-
-    private RodLayer(LX lx) {
-      super(lx);
-      addModulator(zPeriod).start();
-      addModulator(zPos).start();
-    }
-
-    public void run(double deltaMs) {
-      for (LXPoint p : model.points) {
-        float b = 100 - dist(p.x, p.y, model.cx, model.cy) - abs(p.z - zPos.getValuef());
-        if (b > 0) {
-          addColor(p.index, LXColor.hsb(
-          lx.getBaseHuef() + p.z, 
-          0 + saturation.getValuef(), 
-          b
-            ));
-        }
-      }
-    }
-  }
-
-  private class StarLayer extends LXLayer {
-
-    private final TriangleLFO maxBright = new TriangleLFO(0, stars, random(2000, 8000));
-    private final SinLFO brightness = new SinLFO(-1, maxBright, random(3000, 9000)); 
-
-    private int index = 0;
-
-    private StarLayer(LX lx) { 
-      super(lx);
-      addModulator(maxBright).start();
-      addModulator(brightness).start();
-      pickStar();
-    }
-
-    private void pickStar() {
-      index = (int) random(0, model.size-1);
-    }
-
-    public void run(double deltaMs) {
-      if (brightness.getValuef() <= 0) {
-        pickStar();
-      } else {
-        addColor(index, LXColor.hsb(lx.getBaseHuef(), 50, brightness.getValuef()));
-      }
-    }
-  }
-}
-
 //***************************ASkewPlanes*********************************************
 //***************************ASkewPlanes*********************************************
 //***************************ASkewPlanes*********************************************
@@ -225,6 +122,465 @@ class AskewPlanes extends LXPattern {
     }
   }
 }
+
+//***************************Rainbowfadeauto*********************************************
+//***************************Rainbowfadeauto*********************************************
+//***************************Rainbowfadeauto*********************************************
+
+class rainbowfadeauto extends LXPattern {
+  //float period = 1000;
+  //private final BasicParameter periodT = new BasicParameter("T", 1, .001, 1000);
+  private final BasicParameter speed = new BasicParameter("speed", 5, .1, 25);
+  private final BasicParameter saturation = new BasicParameter("sat", 100, 30, 100);
+  private final BasicParameter bright = new BasicParameter("brite", 100, 40, 100);
+  private final SinLFO ysign = new SinLFO(1, -1, 10548);
+  private final SinLFO xsign = new SinLFO(-1, 1, 7893);
+  private final SinLFO zsign = new SinLFO(1, -1, 6211);
+  private final BasicParameter size = new BasicParameter("size", 2, 1.4, 8);
+  //private final BasicParameter ysign = new BasicParameter("ys", -1, -1, 1);
+  //private final BasicParameter xsign = new BasicParameter("xs", -1, -1, 1);
+  //private final BasicParameter zsign = new BasicParameter("zs", -1, -1, 1);
+
+  public rainbowfadeauto(LX lx) {
+    super(lx);
+    addParameter(speed);
+    addParameter(saturation);
+    addParameter(size);
+    addParameter(bright);
+    //addParameter(periodT);
+    addModulator(ysign).trigger();
+    addModulator(xsign).trigger();
+    addModulator(zsign).trigger();
+    //addParameter(ysign);
+    //addParameter(xsign);
+    //addParameter(zsign);
+  }
+  public void run(double deltaMs) {
+
+
+    for (LXPoint p : model.points) {
+      colors[p.index] = lx.hsb(
+      lx.getBaseHuef() * speed.getValuef() - ((ysign.getValuef())*p.y + (xsign.getValuef())*p.x + (zsign.getValuef())*p.z) * size.getValuef(), 
+      saturation.getValuef(), 
+      bright.getValuef());
+    }
+  }
+}
+
+//***************************Rods*********************************************
+//***************************Rods*********************************************
+//***************************Rods*********************************************
+class Rods extends LXPattern {
+  //private final BasicParameter huerate = new BasicParameter("hue", 88, 1, 360);
+  //private final BasicParameter hueup = new BasicParameter("hue", 88, 1, 360);
+  private final BasicParameter hue = new BasicParameter("hue", 300, 1, 320);
+  private final BasicParameter numberofrodsup = new BasicParameter("up", 15, 4, 100);
+  private final BasicParameter numberofrodsdown = new BasicParameter("down", 15, 4, 100);
+  private final BasicParameter speed = new BasicParameter("spd", 0.7, 0.3, 1.2);
+  //private final BasicParameter saturation = new BasicParameter("sat", 100, 0, 100);
+  //final SinLFO saturationup = new SinLFO(100, 0, 26432);
+  //final SinLFO saturationdown = new SinLFO(0, 100, 14421);
+ 
+ // private final BasicParameter falloff = new BasicParameter("fall", 2.8, 1, 8);
+ // private final BasicParameter rodthick = new BasicParameter("thick", 3, 1, 30);
+
+public Rods(LX lx) {
+    super(lx);
+    addLayer(new RodsDown(lx));
+    addLayer(new RodsUp(lx));
+    //addParameter(huerate);
+    addParameter(numberofrodsup);
+    addParameter(numberofrodsdown);
+    addParameter(hue);
+    //addParameter(saturation);
+    addParameter(speed);
+    //addModulator(saturationup).start();
+    //addModulator(saturationdown).start();
+    //addParameter(hueup);
+    //addParameter(falloff);
+    //addParameter(rodthick);
+} 
+public void run(double deltaMs) {
+    //The layers run automatically
+      for (LXPoint p : model.points) {
+        colors[p.index] = 0;
+      }  
+
+}
+ private class RodsDown extends LXLayer { 
+ 
+    int numRods = 100;
+    private final FloatList rodx = new FloatList();
+    private final FloatList rody = new FloatList();
+    private final FloatList rodz = new FloatList();
+    private final FloatList rodhue = new FloatList();
+    private final FloatList rodspeed = new FloatList();
+    private final FloatList distancefromrod = new FloatList();
+    float rodheight = model.yMax;
+
+    private RodsDown(LX lx) {
+      super(lx);
+    
+      for (int i = 0; i < numRods; i++) {
+        rodx.set(i, random(model.xMin, model.xMax));  
+        rody.set(i, 30);  
+        rodz.set(i, random(model.zMin, model.zMax));
+        rodspeed.set(i, random(0.8, 2.6));
+      //  rodhue.set(i, random(280, 310));
+      }
+    }
+  
+    public void run(double deltaMs) {
+  
+      int numRods = round(numberofrodsdown.getValuef());
+      float rodsize = 3;
+  
+//      for (LXPoint p : model.points) {
+//        colors[p.index] = 0;
+//      }
+  
+      for (int i = 0; i < numRods; i++) {
+        rody.set(i, rody.get(i) - (rodspeed.get(i)*speed.getValuef()));
+        if (rody.get(i) < model.yMin - rody.get(i)/2) {
+          rodx.set(i, random(model.xMin, model.xMax));  
+          rody.set(i, model.yMax + rodheight/2);  
+          rodz.set(i, random(model.zMin, model.zMax));
+          //rodhue.set(i, rodhue.get(i) + 1);  
+          //if (rodhue.get(i) > 360) {
+          //  rodhue.set(i, 280);
+          //}
+        }
+      }
+  
+      for (LXPoint p : model.points) {
+  
+        for (int i = 0; i < numRods; i++) {
+  
+          float hv = hue.getValuef(); 
+          float rodius = abs(p.y - rody.get(i));
+          distancefromrod.set(i, rodius);
+          float bv = max(0, 100 - distancefromrod.get(i)*4);
+          if (p.x > rodx.get(i) - rodsize && p.x < rodx.get(i) + rodsize &&
+            p.z > rodz.get(i) - rodsize && p.z < rodz.get(i) + rodsize &&
+            p.y > rody.get(i) - rodheight/2 && p.y < rody.get(i) + rodheight/2)
+          {
+            colors[p.index] = lx.hsb(
+            hv, 
+            min(100, 100 - (abs(p.y - model.cy)*2.3)), 
+            bv);
+          }
+        }
+      }
+    }
+  }
+ private class RodsUp extends LXLayer { 
+ 
+    int numRods = 100;
+    private final FloatList rodx = new FloatList();
+    private final FloatList rody = new FloatList();
+    private final FloatList rodz = new FloatList();
+    private final FloatList rodhue = new FloatList();
+    private final FloatList rodspeed = new FloatList();
+    private final FloatList distancefromrod = new FloatList();
+    float rodheight = model.yMax;
+
+    private RodsUp(LX lx) {
+      super(lx);
+    
+      for (int i = 0; i < numRods; i++) {
+        rodx.set(i, random(model.xMin, model.xMax));  
+        rody.set(i, 1);  
+        rodz.set(i, random(model.zMin, model.zMax));
+        rodspeed.set(i, random(0.8, 2.6));
+      //  rodhue.set(i, random(280, 310));
+      }
+    }
+  
+    public void run(double deltaMs) {
+  
+      int numRods = round(numberofrodsup.getValuef());
+      float rodsize = 3;
+  
+//      for (LXPoint p : model.points) {
+//        colors[p.index] = 0;
+//      }
+  
+      for (int i = 0; i < numRods; i++) {
+        rody.set(i, rody.get(i) + (rodspeed.get(i)*speed.getValuef()));
+        if (rody.get(i) > model.yMax + rody.get(i)/2) {
+          rodx.set(i, random(model.xMin, model.xMax));  
+          rody.set(i, model.yMin - rodheight/2);  
+          rodz.set(i, random(model.zMin, model.zMax));
+          //rodhue.set(i, rodhue.get(i) + 1);  
+          //if (rodhue.get(i) > 360) {
+          //  rodhue.set(i, 280);
+          //}
+        }
+      }
+  
+      for (LXPoint p : model.points) {
+  
+        for (int i = 0; i < numRods; i++) {
+  
+          float hv = hue.getValuef(); 
+          float rodius = abs(p.y - rody.get(i));
+          distancefromrod.set(i, rodius);
+          float bv = max(0, 100 - distancefromrod.get(i)*4);
+          if (p.x > rodx.get(i) - rodsize && p.x < rodx.get(i) + rodsize &&
+            p.z > rodz.get(i) - rodsize && p.z < rodz.get(i) + rodsize &&
+            p.y > rody.get(i) - rodheight/2 && p.y < rody.get(i) + rodheight/2)
+          {
+            colors[p.index] = lx.hsb(
+            (hv * 1.4) % 360, 
+            min(100, 100 - (abs(p.y - model.cy)*2.3)), 
+            bv);
+          }
+        }
+      }
+    }
+  }
+}
+//***************************Multisin*********************************************
+//***************************Multisin*********************************************
+//***************************Multisin*********************************************
+class MultiSine extends LXPattern {
+  final int numLayers = 3;
+  int[][] distLayerDivisors = {
+    {
+      10, 50, 10
+    }
+    , {
+      10, 50, 10
+    }
+  }; 
+  final BasicParameter brightEffect = new BasicParameter("Bright", 6, 4, 10);
+  final BasicParameter colorspread = new BasicParameter("clr", 20, 10, 40);
+  final BasicParameter saturation = new BasicParameter("sat", 90, 15, 90);
+  final BasicParameter[] timingSettings = {
+    new BasicParameter("T1", 6300, 5000, 300000), 
+    new BasicParameter("T2", 4300, 2000, 100000), 
+    new BasicParameter("T3", 11000, 10000, 200000)
+    };
+  SinLFO[] frequencies = {
+    new SinLFO(0, 1, timingSettings[0]), 
+    new SinLFO(0, 1, timingSettings[1]), 
+    new SinLFO(0, 1, timingSettings[2])
+    };      
+    MultiSine(LX lx) {
+      super(lx);
+      for (int i = 0; i < numLayers; i++) {
+       // addParameter(timingSettings[i]);
+        addModulator(frequencies[i]).start();
+        
+      }
+      addParameter(brightEffect);
+      addParameter(saturation);
+      addParameter(colorspread);
+    }
+
+  public void run(double deltaMs) {
+    if (getChannel().getFader().getNormalized() == 0) return;
+
+    for (LXPoint p : model.points) {
+      float[] combinedDistanceSines = {
+        0, 0
+      };
+      for (int i = 0; i < numLayers; i++) {
+        combinedDistanceSines[0] += sin(TWO_PI * frequencies[i].getValuef() + p.y / distLayerDivisors[0][i]) / numLayers;
+        combinedDistanceSines[1] += sin(TWO_PI * frequencies[i].getValuef() + TWO_PI*(p.z / distLayerDivisors[1][i])) / numLayers;
+      }
+      float hueVal = (lx.getBaseHuef() + colorspread.getValuef() * sin(TWO_PI * 1.2*(combinedDistanceSines[0] + combinedDistanceSines[1]))) % 360;
+      float brightVal = (100 - 100) + 100 * (2 + combinedDistanceSines[0] + combinedDistanceSines[1]) / brightEffect.getValuef();
+      float satVal = saturation.getValuef() + 10 * sin(TWO_PI * (combinedDistanceSines[0] + combinedDistanceSines[1]));
+      colors[p.index] = lx.hsb(hueVal, satVal, brightVal);
+    }
+  }
+}
+//***************************candycloudstar*********************************************
+//***************************candycloudstar*********************************************
+//***************************candycloudstar*********************************************
+class candycloudstar extends LXPattern {
+  
+  final BasicParameter darkness = new BasicParameter("DARK", 8, 7.5, 8.5);
+  final BasicParameter scale = new BasicParameter("SCAL", 2400, 500, 5000);
+  final BasicParameter speed = new BasicParameter("SPD", 1, 1, 2);
+  private final BasicParameter stars = new BasicParameter("Stars", 90, 30, 100);
+ 
+  public candycloudstar(LX lx) {
+    super(lx);
+    addLayer(new CandyCloud(lx)); 
+    for (int i = 0; i < 600; ++i) {
+      addLayer(new StarLayer(lx));
+    }
+    addParameter(stars);
+    addParameter(scale);
+    addParameter(darkness); 
+  }
+  public void run(double deltaMs) {
+    // The layers run automatically
+  }
+
+private class CandyCloud extends LXLayer {
+  
+
+
+
+  double time = 0;
+
+  CandyCloud(LX lx) {
+    super(lx);
+
+  }
+
+  public void run(double deltaMs) {
+    if (getChannel().getFader().getNormalized() == 0) return;
+
+    time += deltaMs;
+    for (LXPoint p : model.points) {
+      double adjustedX = p.x / scale.getValue();
+      double adjustedY = p.y / scale.getValue();
+      double adjustedZ = p.z / scale.getValue();
+      double adjustedTime = time * speed.getValue() / 5000;
+
+      float hue = ((float)SimplexNoise.noise(adjustedX, adjustedY, adjustedZ, adjustedTime) + 1) / 2 * 1080 % 360;
+
+      float brightness = min(max((float)SimplexNoise.noise(p.x / 100, p.y / 100, p.z / 100 + 10000, time / 5000) * 2 + 8 - darkness.getValuef(), 0), 1) * 100;
+
+      colors[p.index] = lx.hsb(hue, 100, brightness);
+    }
+  }
+}
+
+   private class StarLayer extends LXLayer {
+
+    private final TriangleLFO maxBright = new TriangleLFO(0, stars, random(2000, 8000));
+    private final SinLFO brightness = new SinLFO(-1, maxBright, random(3000, 9000)); 
+
+    private int index = 0;
+
+    private StarLayer(LX lx) { 
+      super(lx);
+      addModulator(maxBright).start();
+      addModulator(brightness).start();
+      pickStar();
+    }
+
+    private void pickStar() {
+      index = (int) random(0, model.size-1);
+    }
+
+    public void run(double deltaMs) {
+      if (brightness.getValuef() <= 0) {
+        pickStar();
+      } else {
+        addColor(index, LXColor.hsb(lx.getBaseHuef(), 0, brightness.getValuef()));
+      }
+    }
+  }
+}
+class LayerDemoPattern extends LXPattern {
+
+  private final BasicParameter colorSpread = new BasicParameter("Clr", 0, 0, 100);
+  private final BasicParameter stars = new BasicParameter("Stars", 0, 0, 100);
+  private final BasicParameter saturation = new BasicParameter("sat", 100, 0, 100);
+
+  public LayerDemoPattern(LX lx) {
+    super(lx);
+    addParameter(colorSpread);
+    addParameter(stars);
+    addParameter(saturation);
+    addLayer(new CircleLayer(lx));
+    addLayer(new RodLayer(lx));
+    for (int i = 0; i < 800; ++i) {
+      addLayer(new StarLayer(lx));
+    }
+  }
+
+  public void run(double deltaMs) {
+    // The layers run automatically
+  }
+
+  private class CircleLayer extends LXLayer {
+
+    private final SinLFO xPeriod = new SinLFO(1000, 3200, 1000); 
+    private final SinLFO brightnessX = new SinLFO(model.xMin, model.xMax, xPeriod);
+
+    private CircleLayer(LX lx) {
+      super(lx);
+      addModulator(xPeriod).start();
+      addModulator(brightnessX).start();
+    }
+
+    public void run(double deltaMs) {
+      // The layers run automatically
+      float falloff = 100 / (FEET);
+      for (LXPoint p : model.points) {
+        float yWave = model.yRange/4 * sin(p.x / model.xRange * PI); 
+        float distanceFromCenter = dist(p.x, p.y, model.cx, model.cy);
+        float distanceFromBrightness = dist(p.x, abs(p.y - model.cy), brightnessX.getValuef(), yWave);
+        colors[p.index] = LXColor.hsb(
+        lx.getBaseHuef() + colorSpread.getValuef() * distanceFromCenter, 
+        60, 
+        max(0, 100 - falloff*distanceFromBrightness)
+          );
+      }
+    }
+  }
+
+  private class RodLayer extends LXLayer {
+
+    private final SinLFO zPeriod = new SinLFO(800, 1000, 2000);
+    private final SinLFO zPos = new SinLFO(model.zMin, model.zMax, zPeriod);
+
+    private RodLayer(LX lx) {
+      super(lx);
+      addModulator(zPeriod).start();
+      addModulator(zPos).start();
+    }
+
+    public void run(double deltaMs) {
+      for (LXPoint p : model.points) {
+        float b = 100 - dist(p.x, p.y, model.cx, model.cy) - abs(p.z - zPos.getValuef());
+        if (b > 0) {
+          addColor(p.index, LXColor.hsb(
+          lx.getBaseHuef() + p.z, 
+          0 + saturation.getValuef(), 
+          b
+            ));
+        }
+      }
+    }
+  }
+
+  private class StarLayer extends LXLayer {
+
+    private final TriangleLFO maxBright = new TriangleLFO(0, stars, random(2000, 8000));
+    private final SinLFO brightness = new SinLFO(-1, maxBright, random(3000, 9000)); 
+
+    private int index = 0;
+
+    private StarLayer(LX lx) { 
+      super(lx);
+      addModulator(maxBright).start();
+      addModulator(brightness).start();
+      pickStar();
+    }
+
+    private void pickStar() {
+      index = (int) random(0, model.size-1);
+    }
+
+    public void run(double deltaMs) {
+      if (brightness.getValuef() <= 0) {
+        pickStar();
+      } else {
+        addColor(index, LXColor.hsb(lx.getBaseHuef(), 50, brightness.getValuef()));
+      }
+    }
+  }
+}
+
+
 
 
 //********************************ShiftingPlanes******************************************************************
@@ -471,14 +827,14 @@ class CrossSections extends LXPattern {
   protected void addParams() {
     addParameter(saturation);
     addParameter(xr);
-    addParameter(yr);
+    //addParameter(yr);
     addParameter(zr);    
-    addParameter(xw);
-    addParameter(xl);
+    //addParameter(xw);
+    //addParameter(xl);
     addParameter(yl);
-    addParameter(zl);
-    addParameter(yw);    
-    addParameter(zw);
+    //addParameter(zl);
+    //addParameter(yw);    
+    //addParameter(zw);
   }
 
   void onParameterChanged(LXParameter p) {
@@ -937,102 +1293,9 @@ class DFC extends LXPattern {
 }
 
 
-//--------------------------------------------------------
-//--------------------------------Rainbowfadeauto------------------------------------------------------------
 
-class rainbowfadeauto extends LXPattern {
-  //float period = 1000;
-  //private final BasicParameter periodT = new BasicParameter("T", 1, .001, 1000);
-  private final BasicParameter speed = new BasicParameter("speed", 5, .1, 25);
-  private final BasicParameter saturation = new BasicParameter("sat", 100, 30, 100);
-  private final BasicParameter bright = new BasicParameter("brite", 100, 40, 100);
-  private final SinLFO ysign = new SinLFO(1, -1, 10548);
-  private final SinLFO xsign = new SinLFO(-1, 1, 7893);
-  private final SinLFO zsign = new SinLFO(1, -1, 6211);
-  private final BasicParameter size = new BasicParameter("size", 2, 1.4, 8);
-  //private final BasicParameter ysign = new BasicParameter("ys", -1, -1, 1);
-  //private final BasicParameter xsign = new BasicParameter("xs", -1, -1, 1);
-  //private final BasicParameter zsign = new BasicParameter("zs", -1, -1, 1);
-
-  public rainbowfadeauto(LX lx) {
-    super(lx);
-    addParameter(speed);
-    addParameter(saturation);
-    addParameter(size);
-    addParameter(bright);
-    //addParameter(periodT);
-    addModulator(ysign).trigger();
-    addModulator(xsign).trigger();
-    addModulator(zsign).trigger();
-    //addParameter(ysign);
-    //addParameter(xsign);
-    //addParameter(zsign);
-  }
-  public void run(double deltaMs) {
-
-
-    for (LXPoint p : model.points) {
-      colors[p.index] = lx.hsb(
-      lx.getBaseHuef() * speed.getValuef() - ((ysign.getValuef())*p.y + (xsign.getValuef())*p.x + (zsign.getValuef())*p.z) * size.getValuef(), 
-      saturation.getValuef(), 
-      bright.getValuef());
-    }
-  }
-}
 //--------------------------------MultiSine------------------------------------------------------------
-class MultiSine extends LXPattern {
-  final int numLayers = 3;
-  int[][] distLayerDivisors = {
-    {
-      10, 50, 10
-    }
-    , {
-      10, 50, 10
-    }
-  }; 
-  final BasicParameter brightEffect = new BasicParameter("Bright", 6, 4, 10);
-  final BasicParameter colorspread = new BasicParameter("clr", 20, 10, 40);
-  final BasicParameter saturation = new BasicParameter("sat", 90, 15, 90);
-  final BasicParameter[] timingSettings = {
-    new BasicParameter("T1", 6300, 5000, 300000), 
-    new BasicParameter("T2", 4300, 2000, 100000), 
-    new BasicParameter("T3", 11000, 10000, 200000)
-    };
-  SinLFO[] frequencies = {
-    new SinLFO(0, 1, timingSettings[0]), 
-    new SinLFO(0, 1, timingSettings[1]), 
-    new SinLFO(0, 1, timingSettings[2])
-    };      
-    MultiSine(LX lx) {
-      super(lx);
-      for (int i = 0; i < numLayers; i++) {
-        addParameter(timingSettings[i]);
-        addModulator(frequencies[i]).start();
-        
-      }
-      addParameter(brightEffect);
-      addParameter(saturation);
-      addParameter(colorspread);
-    }
 
-  public void run(double deltaMs) {
-    if (getChannel().getFader().getNormalized() == 0) return;
-
-    for (LXPoint p : model.points) {
-      float[] combinedDistanceSines = {
-        0, 0
-      };
-      for (int i = 0; i < numLayers; i++) {
-        combinedDistanceSines[0] += sin(TWO_PI * frequencies[i].getValuef() + p.y / distLayerDivisors[0][i]) / numLayers;
-        combinedDistanceSines[1] += sin(TWO_PI * frequencies[i].getValuef() + TWO_PI*(p.z / distLayerDivisors[1][i])) / numLayers;
-      }
-      float hueVal = (lx.getBaseHuef() + colorspread.getValuef() * sin(TWO_PI * 1.2*(combinedDistanceSines[0] + combinedDistanceSines[1]))) % 360;
-      float brightVal = (100 - 100) + 100 * (2 + combinedDistanceSines[0] + combinedDistanceSines[1]) / brightEffect.getValuef();
-      float satVal = saturation.getValuef() + 10 * sin(TWO_PI * (combinedDistanceSines[0] + combinedDistanceSines[1]));
-      colors[p.index] = lx.hsb(hueVal, satVal, brightVal);
-    }
-  }
-}
 
 //--------------------------------sparkletakeover------------------------------------------------------------
 class SparkleTakeOver extends LXPattern {
@@ -1607,176 +1870,176 @@ class um3_lists extends LXPattern {
 //----------------------------------------------------------------------------------------------------------------------------
 //make this animation relative to deltaMs
 
-class Rods extends LXPattern {
-  //private final BasicParameter huerate = new BasicParameter("hue", 88, 1, 360);
-  //private final BasicParameter hueup = new BasicParameter("hue", 88, 1, 360);
-  private final BasicParameter hue = new BasicParameter("hue", 300, 1, 320);
-  private final BasicParameter numberofrodsup = new BasicParameter("up", 15, 4, 100);
-  private final BasicParameter numberofrodsdown = new BasicParameter("down", 15, 4, 100);
-  private final BasicParameter speed = new BasicParameter("spd", 0.7, 0.3, 1.2);
-  //private final BasicParameter saturation = new BasicParameter("sat", 100, 0, 100);
-  //final SinLFO saturationup = new SinLFO(100, 0, 26432);
-  //final SinLFO saturationdown = new SinLFO(0, 100, 14421);
- 
- // private final BasicParameter falloff = new BasicParameter("fall", 2.8, 1, 8);
- // private final BasicParameter rodthick = new BasicParameter("thick", 3, 1, 30);
-
-public Rods(LX lx) {
-    super(lx);
-    addLayer(new RodsDown(lx));
-    addLayer(new RodsUp(lx));
-    //addParameter(huerate);
-    addParameter(numberofrodsup);
-    addParameter(numberofrodsdown);
-    addParameter(hue);
-    //addParameter(saturation);
-    addParameter(speed);
-    //addModulator(saturationup).start();
-    //addModulator(saturationdown).start();
-    //addParameter(hueup);
-    //addParameter(falloff);
-    //addParameter(rodthick);
-} 
-public void run(double deltaMs) {
-    //The layers run automatically
-      for (LXPoint p : model.points) {
-        colors[p.index] = 0;
-      }  
-
-}
- private class RodsDown extends LXLayer { 
- 
-    int numRods = 100;
-    private final FloatList rodx = new FloatList();
-    private final FloatList rody = new FloatList();
-    private final FloatList rodz = new FloatList();
-    private final FloatList rodhue = new FloatList();
-    private final FloatList rodspeed = new FloatList();
-    private final FloatList distancefromrod = new FloatList();
-    float rodheight = model.yMax;
-
-    private RodsDown(LX lx) {
-      super(lx);
-    
-      for (int i = 0; i < numRods; i++) {
-        rodx.set(i, random(model.xMin, model.xMax));  
-        rody.set(i, 30);  
-        rodz.set(i, random(model.zMin, model.zMax));
-        rodspeed.set(i, random(0.8, 2.6));
-      //  rodhue.set(i, random(280, 310));
-      }
-    }
-  
-    public void run(double deltaMs) {
-  
-      int numRods = round(numberofrodsdown.getValuef());
-      float rodsize = 3;
-  
+//class Rods extends LXPattern {
+//  //private final BasicParameter huerate = new BasicParameter("hue", 88, 1, 360);
+//  //private final BasicParameter hueup = new BasicParameter("hue", 88, 1, 360);
+//  private final BasicParameter hue = new BasicParameter("hue", 300, 1, 320);
+//  private final BasicParameter numberofrodsup = new BasicParameter("up", 15, 4, 100);
+//  private final BasicParameter numberofrodsdown = new BasicParameter("down", 15, 4, 100);
+//  private final BasicParameter speed = new BasicParameter("spd", 0.7, 0.3, 1.2);
+//  //private final BasicParameter saturation = new BasicParameter("sat", 100, 0, 100);
+//  //final SinLFO saturationup = new SinLFO(100, 0, 26432);
+//  //final SinLFO saturationdown = new SinLFO(0, 100, 14421);
+// 
+// // private final BasicParameter falloff = new BasicParameter("fall", 2.8, 1, 8);
+// // private final BasicParameter rodthick = new BasicParameter("thick", 3, 1, 30);
+//
+//public Rods(LX lx) {
+//    super(lx);
+//    addLayer(new RodsDown(lx));
+//    addLayer(new RodsUp(lx));
+//    //addParameter(huerate);
+//    addParameter(numberofrodsup);
+//    addParameter(numberofrodsdown);
+//    addParameter(hue);
+//    //addParameter(saturation);
+//    addParameter(speed);
+//    //addModulator(saturationup).start();
+//    //addModulator(saturationdown).start();
+//    //addParameter(hueup);
+//    //addParameter(falloff);
+//    //addParameter(rodthick);
+//} 
+//public void run(double deltaMs) {
+//    //The layers run automatically
 //      for (LXPoint p : model.points) {
 //        colors[p.index] = 0;
+//      }  
+//
+//}
+// private class RodsDown extends LXLayer { 
+// 
+//    int numRods = 100;
+//    private final FloatList rodx = new FloatList();
+//    private final FloatList rody = new FloatList();
+//    private final FloatList rodz = new FloatList();
+//    private final FloatList rodhue = new FloatList();
+//    private final FloatList rodspeed = new FloatList();
+//    private final FloatList distancefromrod = new FloatList();
+//    float rodheight = model.yMax;
+//
+//    private RodsDown(LX lx) {
+//      super(lx);
+//    
+//      for (int i = 0; i < numRods; i++) {
+//        rodx.set(i, random(model.xMin, model.xMax));  
+//        rody.set(i, 30);  
+//        rodz.set(i, random(model.zMin, model.zMax));
+//        rodspeed.set(i, random(0.8, 2.6));
+//      //  rodhue.set(i, random(280, 310));
 //      }
-  
-      for (int i = 0; i < numRods; i++) {
-        rody.set(i, rody.get(i) - (rodspeed.get(i)*speed.getValuef()));
-        if (rody.get(i) < model.yMin - rody.get(i)/2) {
-          rodx.set(i, random(model.xMin, model.xMax));  
-          rody.set(i, model.yMax + rodheight/2);  
-          rodz.set(i, random(model.zMin, model.zMax));
-          //rodhue.set(i, rodhue.get(i) + 1);  
-          //if (rodhue.get(i) > 360) {
-          //  rodhue.set(i, 280);
-          //}
-        }
-      }
-  
-      for (LXPoint p : model.points) {
-  
-        for (int i = 0; i < numRods; i++) {
-  
-          float hv = hue.getValuef(); 
-          float rodius = abs(p.y - rody.get(i));
-          distancefromrod.set(i, rodius);
-          float bv = max(0, 100 - distancefromrod.get(i)*4);
-          if (p.x > rodx.get(i) - rodsize && p.x < rodx.get(i) + rodsize &&
-            p.z > rodz.get(i) - rodsize && p.z < rodz.get(i) + rodsize &&
-            p.y > rody.get(i) - rodheight/2 && p.y < rody.get(i) + rodheight/2)
-          {
-            colors[p.index] = lx.hsb(
-            hv, 
-            min(100, 100 - (abs(p.y - model.cy)*2.3)), 
-            bv);
-          }
-        }
-      }
-    }
-  }
- private class RodsUp extends LXLayer { 
- 
-    int numRods = 100;
-    private final FloatList rodx = new FloatList();
-    private final FloatList rody = new FloatList();
-    private final FloatList rodz = new FloatList();
-    private final FloatList rodhue = new FloatList();
-    private final FloatList rodspeed = new FloatList();
-    private final FloatList distancefromrod = new FloatList();
-    float rodheight = model.yMax;
-
-    private RodsUp(LX lx) {
-      super(lx);
-    
-      for (int i = 0; i < numRods; i++) {
-        rodx.set(i, random(model.xMin, model.xMax));  
-        rody.set(i, 1);  
-        rodz.set(i, random(model.zMin, model.zMax));
-        rodspeed.set(i, random(0.8, 2.6));
-      //  rodhue.set(i, random(280, 310));
-      }
-    }
-  
-    public void run(double deltaMs) {
-  
-      int numRods = round(numberofrodsup.getValuef());
-      float rodsize = 3;
-  
+//    }
+//  
+//    public void run(double deltaMs) {
+//  
+//      int numRods = round(numberofrodsdown.getValuef());
+//      float rodsize = 3;
+//  
+////      for (LXPoint p : model.points) {
+////        colors[p.index] = 0;
+////      }
+//  
+//      for (int i = 0; i < numRods; i++) {
+//        rody.set(i, rody.get(i) - (rodspeed.get(i)*speed.getValuef()));
+//        if (rody.get(i) < model.yMin - rody.get(i)/2) {
+//          rodx.set(i, random(model.xMin, model.xMax));  
+//          rody.set(i, model.yMax + rodheight/2);  
+//          rodz.set(i, random(model.zMin, model.zMax));
+//          //rodhue.set(i, rodhue.get(i) + 1);  
+//          //if (rodhue.get(i) > 360) {
+//          //  rodhue.set(i, 280);
+//          //}
+//        }
+//      }
+//  
 //      for (LXPoint p : model.points) {
-//        colors[p.index] = 0;
+//  
+//        for (int i = 0; i < numRods; i++) {
+//  
+//          float hv = hue.getValuef(); 
+//          float rodius = abs(p.y - rody.get(i));
+//          distancefromrod.set(i, rodius);
+//          float bv = max(0, 100 - distancefromrod.get(i)*4);
+//          if (p.x > rodx.get(i) - rodsize && p.x < rodx.get(i) + rodsize &&
+//            p.z > rodz.get(i) - rodsize && p.z < rodz.get(i) + rodsize &&
+//            p.y > rody.get(i) - rodheight/2 && p.y < rody.get(i) + rodheight/2)
+//          {
+//            colors[p.index] = lx.hsb(
+//            hv, 
+//            min(100, 100 - (abs(p.y - model.cy)*2.3)), 
+//            bv);
+//          }
+//        }
 //      }
-  
-      for (int i = 0; i < numRods; i++) {
-        rody.set(i, rody.get(i) + (rodspeed.get(i)*speed.getValuef()));
-        if (rody.get(i) > model.yMax + rody.get(i)/2) {
-          rodx.set(i, random(model.xMin, model.xMax));  
-          rody.set(i, model.yMin - rodheight/2);  
-          rodz.set(i, random(model.zMin, model.zMax));
-          //rodhue.set(i, rodhue.get(i) + 1);  
-          //if (rodhue.get(i) > 360) {
-          //  rodhue.set(i, 280);
-          //}
-        }
-      }
-  
-      for (LXPoint p : model.points) {
-  
-        for (int i = 0; i < numRods; i++) {
-  
-          float hv = hue.getValuef(); 
-          float rodius = abs(p.y - rody.get(i));
-          distancefromrod.set(i, rodius);
-          float bv = max(0, 100 - distancefromrod.get(i)*4);
-          if (p.x > rodx.get(i) - rodsize && p.x < rodx.get(i) + rodsize &&
-            p.z > rodz.get(i) - rodsize && p.z < rodz.get(i) + rodsize &&
-            p.y > rody.get(i) - rodheight/2 && p.y < rody.get(i) + rodheight/2)
-          {
-            colors[p.index] = lx.hsb(
-            (hv * 1.4) % 360, 
-            min(100, 100 - (abs(p.y - model.cy)*2.3)), 
-            bv);
-          }
-        }
-      }
-    }
-  }
-}
+//    }
+//  }
+// private class RodsUp extends LXLayer { 
+// 
+//    int numRods = 100;
+//    private final FloatList rodx = new FloatList();
+//    private final FloatList rody = new FloatList();
+//    private final FloatList rodz = new FloatList();
+//    private final FloatList rodhue = new FloatList();
+//    private final FloatList rodspeed = new FloatList();
+//    private final FloatList distancefromrod = new FloatList();
+//    float rodheight = model.yMax;
+//
+//    private RodsUp(LX lx) {
+//      super(lx);
+//    
+//      for (int i = 0; i < numRods; i++) {
+//        rodx.set(i, random(model.xMin, model.xMax));  
+//        rody.set(i, 1);  
+//        rodz.set(i, random(model.zMin, model.zMax));
+//        rodspeed.set(i, random(0.8, 2.6));
+//      //  rodhue.set(i, random(280, 310));
+//      }
+//    }
+//  
+//    public void run(double deltaMs) {
+//  
+//      int numRods = round(numberofrodsup.getValuef());
+//      float rodsize = 3;
+//  
+////      for (LXPoint p : model.points) {
+////        colors[p.index] = 0;
+////      }
+//  
+//      for (int i = 0; i < numRods; i++) {
+//        rody.set(i, rody.get(i) + (rodspeed.get(i)*speed.getValuef()));
+//        if (rody.get(i) > model.yMax + rody.get(i)/2) {
+//          rodx.set(i, random(model.xMin, model.xMax));  
+//          rody.set(i, model.yMin - rodheight/2);  
+//          rodz.set(i, random(model.zMin, model.zMax));
+//          //rodhue.set(i, rodhue.get(i) + 1);  
+//          //if (rodhue.get(i) > 360) {
+//          //  rodhue.set(i, 280);
+//          //}
+//        }
+//      }
+//  
+//      for (LXPoint p : model.points) {
+//  
+//        for (int i = 0; i < numRods; i++) {
+//  
+//          float hv = hue.getValuef(); 
+//          float rodius = abs(p.y - rody.get(i));
+//          distancefromrod.set(i, rodius);
+//          float bv = max(0, 100 - distancefromrod.get(i)*4);
+//          if (p.x > rodx.get(i) - rodsize && p.x < rodx.get(i) + rodsize &&
+//            p.z > rodz.get(i) - rodsize && p.z < rodz.get(i) + rodsize &&
+//            p.y > rody.get(i) - rodheight/2 && p.y < rody.get(i) + rodheight/2)
+//          {
+//            colors[p.index] = lx.hsb(
+//            (hv * 1.4) % 360, 
+//            min(100, 100 - (abs(p.y - model.cy)*2.3)), 
+//            bv);
+//          }
+//        }
+//      }
+//    }
+//  }
+//}
 
 //-------------
 
@@ -1825,85 +2088,7 @@ class block extends LXPattern {
 }
 
 
-class candycloudstar extends LXPattern {
-  
-  final BasicParameter darkness = new BasicParameter("DARK", 8, 7.5, 8.5);
-  final BasicParameter scale = new BasicParameter("SCAL", 2400, 500, 5000);
-  final BasicParameter speed = new BasicParameter("SPD", 1, 1, 2);
-  private final BasicParameter stars = new BasicParameter("Stars", 90, 30, 100);
- 
-  public candycloudstar(LX lx) {
-    super(lx);
-    addLayer(new CandyCloud(lx)); 
-    for (int i = 0; i < 600; ++i) {
-      addLayer(new StarLayer(lx));
-    }
-    addParameter(stars);
-    addParameter(scale);
-    addParameter(darkness); 
-  }
-  public void run(double deltaMs) {
-    // The layers run automatically
-  }
 
-private class CandyCloud extends LXLayer {
-  
-
-
-
-  double time = 0;
-
-  CandyCloud(LX lx) {
-    super(lx);
-
-  }
-
-  public void run(double deltaMs) {
-    if (getChannel().getFader().getNormalized() == 0) return;
-
-    time += deltaMs;
-    for (LXPoint p : model.points) {
-      double adjustedX = p.x / scale.getValue();
-      double adjustedY = p.y / scale.getValue();
-      double adjustedZ = p.z / scale.getValue();
-      double adjustedTime = time * speed.getValue() / 5000;
-
-      float hue = ((float)SimplexNoise.noise(adjustedX, adjustedY, adjustedZ, adjustedTime) + 1) / 2 * 1080 % 360;
-
-      float brightness = min(max((float)SimplexNoise.noise(p.x / 100, p.y / 100, p.z / 100 + 10000, time / 5000) * 2 + 8 - darkness.getValuef(), 0), 1) * 100;
-
-      colors[p.index] = lx.hsb(hue, 100, brightness);
-    }
-  }
-}
-
-   private class StarLayer extends LXLayer {
-
-    private final TriangleLFO maxBright = new TriangleLFO(0, stars, random(2000, 8000));
-    private final SinLFO brightness = new SinLFO(-1, maxBright, random(3000, 9000)); 
-
-    private int index = 0;
-
-    private StarLayer(LX lx) { 
-      super(lx);
-      addModulator(maxBright).start();
-      addModulator(brightness).start();
-      pickStar();
-    }
-
-    private void pickStar() {
-      index = (int) random(0, model.size-1);
-    }
-
-    public void run(double deltaMs) {
-      if (brightness.getValuef() <= 0) {
-        pickStar();
-      } else {
-        addColor(index, LXColor.hsb(lx.getBaseHuef(), 0, brightness.getValuef()));
-      }
-    }
-  }
-}
 
 
 
@@ -2273,20 +2458,22 @@ class ParameterWave extends LXPattern {
   final BasicParameter thick = new BasicParameter("THICK", 2, 1, 5);
   final BasicParameter xColor = new BasicParameter("X-COLOR", 0);
   final BasicParameter yColor = new BasicParameter("Y-COLOR", 0);
-  final SinLFO thickness = new SinLFO(1, 5, 6324);
-  final SinLFO amplitude = new SinLFO(0, 1, 9422);
+  final BasicParameter colorQ = new BasicParameter("clrs", 1, 1, 360);
+  final SinLFO thickness = new SinLFO(0.5, 3, 30324);
+  final SinLFO amplitude = new SinLFO(0, 0.65, 15422);
 
   private float base = 0;
   private float altBase = 0;
 
   ParameterWave(LX lx) {
     super(lx);
-    addParameter(amp);
+   // addParameter(amp);
     addParameter(speed);
-    addParameter(period);
-    addParameter(thick);
-    addParameter(xColor);
-    addParameter(yColor);
+   // addParameter(period);
+   // addParameter(thick);
+  //  addParameter(xColor);
+   // addParameter(yColor);
+    addParameter(colorQ);
     addModulator(thickness).start();
     addModulator(amplitude).start();
   }
@@ -2303,6 +2490,7 @@ class ParameterWave extends LXPattern {
         abs(p.y - model.cy) / model.yRange * 360 * yColor.getValuef();
       color clr = lx.hsb(
       (lx.getBaseHuef() + hShift) % 360, 
+     //(lx.getBaseHuef() + p.y) % 360,
       100, 
       max(0, 100 - (100 / (thickness.getValuef()*FEET)) * abs(p.y - svy))
         );
@@ -2320,9 +2508,15 @@ class ParameterWave extends LXPattern {
         bri = brightness(clr);
         sat = saturation(clr);
       }
+      
+      
+      
+      
       colors[p.index] = lx.hsb(
-      (hue(clr) + (lx.getBaseHuef() + hShift2)) % 360, 
-      sat, 
+      //(hue(clr) + (lx.getBaseHuef() + hShift2)) % 360, 
+      //(p.y *6 + colorQ.getValuef()) % 360,
+      ((abs(p.y - model.cy)*2.8) + colorQ.getValuef()) % 360,
+      max(0, (100 - abs(p.y - model.cy)*2)), 
       bri
         );
     }
