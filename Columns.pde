@@ -60,7 +60,6 @@ void setup() {
     new Strobe(lx),
     new Pulse(lx),
     new Bouncing(lx),
-    new CrossSections(lx),
     new SparkleHelix(lx), 
     new rainbowfade(lx),  
     new Twinkle(lx), 
@@ -137,7 +136,7 @@ void setup() {
   // MIDI stuff (APC40)
   midiEngine = new MidiEngine(lx);
 
-  buildOutputs();
+  //buildOutputs();
 }
 
 void draw() {

@@ -354,8 +354,9 @@ class MultiSine extends LXPattern {
     }
   }; 
   final BasicParameter brightEffect = new BasicParameter("Bright", 6, 4, 10);
-  final BasicParameter colorspread = new BasicParameter("clr", 20, 10, 40);
+  final BasicParameter colorspread = new BasicParameter("clr", 40, 10, 60);
   final BasicParameter saturation = new BasicParameter("sat", 90, 15, 90);
+  final BasicParameter hue = new BasicParameter("hue", 0, 0, 360);
   final BasicParameter[] timingSettings = {
     new BasicParameter("T1", 6300, 5000, 300000), 
     new BasicParameter("T2", 4300, 2000, 100000), 
@@ -376,6 +377,7 @@ class MultiSine extends LXPattern {
       addParameter(brightEffect);
       addParameter(saturation);
       addParameter(colorspread);
+      addParameter(hue);
     }
 
   public void run(double deltaMs) {
@@ -389,7 +391,7 @@ class MultiSine extends LXPattern {
         combinedDistanceSines[0] += sin(TWO_PI * frequencies[i].getValuef() + p.y / distLayerDivisors[0][i]) / numLayers;
         combinedDistanceSines[1] += sin(TWO_PI * frequencies[i].getValuef() + TWO_PI*(p.z / distLayerDivisors[1][i])) / numLayers;
       }
-      float hueVal = (lx.getBaseHuef() + colorspread.getValuef() * sin(TWO_PI * 1.2*(combinedDistanceSines[0] + combinedDistanceSines[1]))) % 360;
+      float hueVal = (colorspread.getValuef() * sin(TWO_PI * 1.2*(combinedDistanceSines[0] + combinedDistanceSines[1])) + hue.getValuef()) % 360;
       float brightVal = (100 - 100) + 100 * (2 + combinedDistanceSines[0] + combinedDistanceSines[1]) / brightEffect.getValuef();
       float satVal = saturation.getValuef() + 10 * sin(TWO_PI * (combinedDistanceSines[0] + combinedDistanceSines[1]));
       colors[p.index] = lx.hsb(hueVal, satVal, brightVal);
@@ -402,8 +404,9 @@ class MultiSine extends LXPattern {
 class candycloudstar extends LXPattern {
   
   final BasicParameter darkness = new BasicParameter("DARK", 8, 7.5, 8.5);
-  final BasicParameter scale = new BasicParameter("SCAL", 2400, 500, 5000);
+  final BasicParameter scale = new BasicParameter("SCAL", 2400, 300, 3500);
   final BasicParameter speed = new BasicParameter("SPD", 1, 1, 2);
+  final BasicParameter strclr = new BasicParameter("strclr", 132, 1, 360);
   private final BasicParameter stars = new BasicParameter("Stars", 90, 30, 100);
  
   public candycloudstar(LX lx) {
@@ -414,7 +417,8 @@ class candycloudstar extends LXPattern {
     }
     addParameter(stars);
     addParameter(scale);
-    addParameter(darkness); 
+    addParameter(darkness);
+   addParameter(strclr);  
   }
   public void run(double deltaMs) {
     // The layers run automatically
@@ -473,7 +477,7 @@ private class CandyCloud extends LXLayer {
       if (brightness.getValuef() <= 0) {
         pickStar();
       } else {
-        addColor(index, LXColor.hsb(lx.getBaseHuef(), 0, brightness.getValuef()));
+        addColor(index, LXColor.hsb(strclr.getValuef(), 65, brightness.getValuef()));
       }
     }
   }
@@ -2459,6 +2463,8 @@ class ParameterWave extends LXPattern {
   final BasicParameter xColor = new BasicParameter("X-COLOR", 0);
   final BasicParameter yColor = new BasicParameter("Y-COLOR", 0);
   final BasicParameter colorQ = new BasicParameter("clrs", 1, 1, 360);
+  final BasicParameter saturation = new BasicParameter("sat", 2, 1, 6);
+  final BasicParameter colorspread = new BasicParameter("clrspd", 2.8, 1, 4);
   final SinLFO thickness = new SinLFO(0.5, 3, 30324);
   final SinLFO amplitude = new SinLFO(0, 0.65, 15422);
 
@@ -2469,10 +2475,12 @@ class ParameterWave extends LXPattern {
     super(lx);
    // addParameter(amp);
     addParameter(speed);
+    addParameter(saturation);
    // addParameter(period);
    // addParameter(thick);
   //  addParameter(xColor);
    // addParameter(yColor);
+    addParameter(colorspread);
     addParameter(colorQ);
     addModulator(thickness).start();
     addModulator(amplitude).start();
@@ -2515,8 +2523,8 @@ class ParameterWave extends LXPattern {
       colors[p.index] = lx.hsb(
       //(hue(clr) + (lx.getBaseHuef() + hShift2)) % 360, 
       //(p.y *6 + colorQ.getValuef()) % 360,
-      ((abs(p.y - model.cy)*2.8) + colorQ.getValuef()) % 360,
-      max(0, (100 - abs(p.y - model.cy)*2)), 
+      ((abs(p.y - model.cy)*colorspread.getValuef()) + colorQ.getValuef()) % 360,
+      max(0, (100 - abs(p.y - model.cy)*saturation.getValuef())), 
       bri
         );
     }
