@@ -1367,21 +1367,25 @@ class SparkleTakeOver extends LXPattern {
 class SparkleHelix extends LXPattern {
   final BasicParameter minCoil = new BasicParameter("MinCOIL", .02, .005, .05);
   final BasicParameter maxCoil = new BasicParameter("MaxCOIL", .03, .005, .05);
-  final BasicParameter sparkle = new BasicParameter("Spark", 80, 160, 10);
-  final BasicParameter sparkleSaturation = new BasicParameter("Sat", 50, 0, 100);
+  final BasicParameter Coil = new BasicParameter("COIL", .03, .005, .15);
+  final BasicParameter sparkle = new BasicParameter("Spark", 80, 140, 30);
+  final BasicParameter sparkleSaturation = new BasicParameter("Sat", 40, 0, 80);
   final BasicParameter counterSpiralStrength = new BasicParameter("Double", 0, 0, 1);
+  final BasicParameter hues = new BasicParameter("hue", 310, 0, 360);
 
-  final SinLFO coil = new SinLFO(minCoil, maxCoil, 8000);
+  final SinLFO coil = new SinLFO(Coil, minCoil, 8000);
   final SinLFO rate = new SinLFO(6000, 1000, 19000);
   final SawLFO spin = new SawLFO(0, TWO_PI, rate);
   final SinLFO width = new SinLFO(10, 20, 11000);
   int[] sparkleTimeOuts;
   SparkleHelix(LX lx) {
     super(lx);
-    addParameter(minCoil);
-    addParameter(maxCoil);
+    addParameter(Coil);
+    addParameter(hues);
     addParameter(sparkle);
     addParameter(sparkleSaturation);
+    addParameter(minCoil);
+    addParameter(maxCoil);
     addParameter(counterSpiralStrength);
     addModulator(rate).start();
     addModulator(coil).start();    
@@ -1397,7 +1401,7 @@ class SparkleHelix extends LXPattern {
       float compensatedWidth = (0.7 + .02 / coil.getValuef()) * width.getValuef();
       float spiralVal = max(0, 100 - (100*TWO_PI / (compensatedWidth))*LXUtils.wrapdistf((TWO_PI / 360) * p.x, 8*TWO_PI + spin.getValuef() + coil.getValuef()*(p.y-model.cy), TWO_PI));
       float counterSpiralVal = counterSpiralStrength.getValuef() * max(0, 100 - (100*TWO_PI / (compensatedWidth))*LXUtils.wrapdistf((TWO_PI / 360) * p.x, 8*TWO_PI - spin.getValuef() - coil.getValuef()*(p.y-model.cy), TWO_PI));
-      float hueVal = (lx.getBaseHuef() + .1*p.y) % 360;
+      float hueVal = (hues.getValuef() + .4*p.y) % 360;
       if (sparkleTimeOuts[p.index] > millis()) {        
         colors[p.index] = lx.hsb(hueVal, sparkleSaturation.getValuef(), 100);
       } else {

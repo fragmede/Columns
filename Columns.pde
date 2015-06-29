@@ -50,7 +50,8 @@ void setup() {
   patterns = new LXPattern[] {
     new AskewPlanes(lx),
     new rainbowfadeauto(lx),
-    new Rods(lx),
+    //new Rods(lx),
+    new SparkleHelix(lx), 
     new MultiSine(lx), 
     new candycloudstar(lx),
     new ParameterWave(lx),
