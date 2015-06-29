@@ -1,3 +1,3 @@
 void buildOutputs(){
-  lx.addOutput(new FadecandyOutput(lx, "fcserver.local", 7890));
+  lx.addOutput(new FadecandyOutput(lx, "localhost", 7890));
 }
